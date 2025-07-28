@@ -1,20 +1,28 @@
-import fervorLogo from '/fj.svg'
-import './App.css'
+import { Suspense } from 'react'
+import { PageLoader } from './ui/loader/PageLoader'
+import { BrowserRouter, Route, Routes, Navigate} from 'react-router-dom'
+import LoginForm from './modules/auth'
+import { AUTH_ROUTES } from './modules/auth/routes'
+import { USERS_ROUTES } from './modules/users/routes'
+import PrivateRoute from './routes/PrivateRoutes'
 
 function App() {
   return (
-    <>
-      <div>
-        <img src={fervorLogo} className="logo react" alt="Vite logo" />
-      </div>
-      <h1>Próximamente nuestra own Page u.u</h1>
-      <div className="card">
-        <p className="read-the-docs">
-          Todos los derechos reservados a la Agrupación Folklórica "Fervor Juvenil", Samán-Marcavelica 🇵🇪
-        </p>
-      </div>
-
-    </>
+    <Suspense fallback={<PageLoader />}>
+      <BrowserRouter>
+        <Routes>
+          <Route path={AUTH_ROUTES.LOGIN} element={<LoginForm />} />
+          {/* HOME */}
+          <Route
+            path='/'
+            element={<Navigate to={USERS_ROUTES.INDEX} />}
+          />
+          <Route element={<PrivateRoute />} >
+            <Route path={USERS_ROUTES.INDEX} element={<div>Home</div>} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </Suspense>
   )
 }
 
