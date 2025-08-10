@@ -1,11 +1,12 @@
 // import env from "@/endpoints/env";
-import axios, { AxiosHeaders, type AxiosInstance } from "axios";
-import { getAccessToken } from "../../modules/auth/utils";
-import { API_URL_V1 } from "../../@common/env";
+import axios, { AxiosHeaders, type AxiosInstance } from 'axios'
+
+import { API_URL_V1 } from '../../@common/env'
+import { getAccessToken } from '../../modules/auth/utils'
 
 interface CustomHeaders extends Partial<AxiosHeaders> {
-    "Content-Type": string;
-    "ngrok-skip-browser-warning"?: string;
+    'Content-Type': string;
+    'ngrok-skip-browser-warning'?: string;
 }
 
 /**
@@ -22,29 +23,34 @@ interface CustomHeaders extends Partial<AxiosHeaders> {
  * apiV1.get('/ruta').then(response => console.log(response.data));
  */
 const createApiClient = (baseUrl: string): AxiosInstance => {
-    const headers: CustomHeaders = {
-        "Content-Type": "application/json",
-        ...(baseUrl.includes("ngrok") && { "ngrok-skip-browser-warning": "again" }),
-    };
+  const headers: CustomHeaders = {
+    'Content-Type': 'application/json',
+    ...(baseUrl.includes('ngrok') && { 'ngrok-skip-browser-warning': 'again' })
+  }
 
-    const instance = axios.create({
-        baseURL: baseUrl,
-        headers,
-    });
+  const instance = axios.create({
+    baseURL: baseUrl,
+    headers
+  })
 
-    instance.interceptors.request.use((config) => {
-        const token = getAccessToken();
-        if (token && config.headers instanceof axios.AxiosHeaders) {
-            config.headers.set('Authorization', `Bearer ${token}`);
-        }
+  instance.interceptors.request.use((config) => {
+    const token = getAccessToken()
+    if(token && config.headers instanceof axios.AxiosHeaders)
+      config.headers.set('Authorization', `Bearer ${token}`)
 
-        return config;
-    });
+    // TODO: Evaluar diferencia entre headers 1 y 2
+    // config.headers.Authorization = `Bearer ${getAccessToken()}`;
+    // config.headers = {
+    //     ...axios.defaults.headers.common,
+    //     ...config.headers,
+    // };
+    return config
+  })
 
-    return instance;
-};
+  return instance
+}
 
-type ApiVersion = "FJ_APIv1";
+type ApiVersion = 'FJ_APIv1';
 type ApiClient = { [key in ApiVersion]: AxiosInstance };
 
 /**
@@ -63,5 +69,5 @@ type ApiClient = { [key in ApiVersion]: AxiosInstance };
  *
  */
 export const api: ApiClient = {
-    FJ_APIv1: createApiClient(API_URL_V1),
-};
+  FJ_APIv1: createApiClient(API_URL_V1)
+}
