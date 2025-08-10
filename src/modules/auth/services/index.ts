@@ -8,4 +8,4 @@ interface IloginUserResponse {
     user: IUser
 }
 
-export const loginUser = (user: ILoginInputs) => api.FJ_APIv1.post<IloginUserResponse>('/login', user)
+export const loginUser = (user: ILoginInputs) => api.FJ_APIv1.post<IloginUserResponse>('/auth/login', user)
