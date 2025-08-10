@@ -8,6 +8,9 @@
   --color-fj-red: #F20001;
   --color-fj-orange: #F55301;
 }
+.bg-fj-gradient {
+  background: linear-gradient(0deg, rgba(62, 226, 1, 1) 0%, rgba(244, 254, 60, 1) 50%, rgba(254, 0, 229, 1) 100%);
+}
 .loader {
   position: relative;
   width: 2.5em;
