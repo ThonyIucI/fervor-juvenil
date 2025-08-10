@@ -18,7 +18,7 @@ const UserView = () => {
   if(!user) return <div>No tienes acceso a esta página</div>
 
   return (
-    <div className="px-6 max-w-5xl mx-auto space-y-6">
+    <div className="px-6 max-w-5xl mx-auto space-y-6 animate-fadeIn">
       <h1 className="text-xl font-bold text-gray-800 pt-4">Perfil</h1>
       <Card>
         <div className="flex items-center space-x-4">
