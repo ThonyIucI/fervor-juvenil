@@ -1,4 +1,3 @@
-// import env from "@/endpoints/env";
 import axios, { AxiosHeaders, type AxiosInstance } from 'axios'
 
 import { API_URL_V1 } from '../../@common/env'
