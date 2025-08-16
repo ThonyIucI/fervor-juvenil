@@ -9,21 +9,24 @@ export function Button({
   isLoading,
   leftIcon,
   rightIcon,
+  fullWidth,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
     children: ReactNode
     isLoading?: boolean
     leftIcon?: ReactNode
     rightIcon?: ReactNode
+    fullWidth?: boolean
 }) {
   return (
     <button
       disabled={props.disabled || isLoading}
       {...props}
       className={cn(
-        'relative inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200',
+        'relative inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200',
         'bg-gray-100 hover:bg-gray-200 text-gray-900 cursor-pointer',
         'disabled:opacity-80 disabled:cursor-not-allowed',
+        fullWidth ? 'w-full' : 'w-fit',
         className
       )}
     >

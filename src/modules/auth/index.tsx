@@ -46,11 +46,17 @@ export default function LoginForm() {
                 <Eye size={20} onClick={isPasswordType.open} />
             }
           />
-
+          {/* TODO: Generalize ui components */}
+          {/* <Button
+            children="Ingresar"
+            isLoading={!isLoading}
+            fullWidth
+            className='bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-1xl'
+          /> */}
           <button
             disabled={isLoading}
             className="w-full cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition-colors">
-                        Ingresar
+            Ingresar
           </button>
         </form>
 
