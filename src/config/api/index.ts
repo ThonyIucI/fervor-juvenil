@@ -4,8 +4,8 @@ import { API_URL_V1 } from '../../@common/env'
 import { getAccessToken } from '../../modules/auth/utils'
 
 interface CustomHeaders extends Partial<AxiosHeaders> {
-    'Content-Type': string;
-    'ngrok-skip-browser-warning'?: string;
+  'Content-Type': string
+  'ngrok-skip-browser-warning'?: string
 }
 
 /**
@@ -34,7 +34,7 @@ const createApiClient = (baseUrl: string): AxiosInstance => {
 
   instance.interceptors.request.use((config) => {
     const token = getAccessToken()
-    if(token && config.headers instanceof axios.AxiosHeaders)
+    if (token && config.headers instanceof axios.AxiosHeaders)
       config.headers.set('Authorization', `Bearer ${token}`)
 
     // TODO: Evaluar diferencia entre headers 1 y 2
@@ -49,8 +49,8 @@ const createApiClient = (baseUrl: string): AxiosInstance => {
   return instance
 }
 
-type ApiVersion = 'FJ_APIv1';
-type ApiClient = { [key in ApiVersion]: AxiosInstance };
+type ApiVersion = 'FJ_APIv1'
+type ApiClient = { [key in ApiVersion]: AxiosInstance }
 
 /**
  * Objeto que contiene instancias de Axios configuradas para diferentes versiones de la API.

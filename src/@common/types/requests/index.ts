@@ -1,3 +1,3 @@
 export interface IData<T> {
-    data: T;
+  data: T
 }
