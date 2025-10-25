@@ -9,32 +9,30 @@ import type { ILoginInputs } from '../types/Login'
 import { getAccessToken } from '../utils'
 
 const useLogin = () => {
-  const [ isLoading, setIsLoading ] = useState(false)
-  const [ loginErros, setLoginErrors ] = useState<ILoginInputs | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [loginErros, setLoginErrors] = useState<ILoginInputs | null>(null)
   const accessToken = getAccessToken()
   const setToken = (token: string) => localStorage.setItem('accessToken', token)
   const { user, setUser } = useUserState()
 
   const navigate = useNavigate()
-  const handleLogin = useCallback(
-    async (LoginInputs: ILoginInputs) => {
-      setIsLoading(true)
-      try {
-        const { data } = await loginUser(LoginInputs)
+  const handleLogin = useCallback(async (LoginInputs: ILoginInputs) => {
+    setIsLoading(true)
+    try {
+      const { data } = await loginUser(LoginInputs)
 
-        if(!data?.accessToken || !data?.user) return logOut()
+      if (!data?.accessToken || !data?.user) return logOut()
 
-        setToken(data.accessToken)
-        setUser(data.user)
-        navigate(USERS_ROUTES.INDEX)
-      } catch (err: any) {
-        setLoginErrors(err?.response?.data?.errors)
-      } finally {
-        setIsLoading(false)
-      }
-    },
-    []
-  )
+      setToken(data.accessToken)
+      setUser(data.user)
+      navigate(USERS_ROUTES.INDEX)
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { errors?: ILoginInputs } } }
+      setLoginErrors(error?.response?.data?.errors ?? null)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
   const logOut = () => {
     setToken('')
