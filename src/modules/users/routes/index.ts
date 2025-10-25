@@ -1,3 +1,3 @@
 export const USERS_ROUTES = {
-    INDEX: '/users/me',
+  INDEX: '/users/me'
 }
