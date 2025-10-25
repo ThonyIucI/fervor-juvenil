@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 export const useBoolean = (initialShow = false) => {
-  const [ active, setActive ] = useState(initialShow)
+  const [active, setActive] = useState(initialShow)
   const open = () => setActive(true)
   const close = () => setActive(false)
   const toggle = () => setActive(!active)

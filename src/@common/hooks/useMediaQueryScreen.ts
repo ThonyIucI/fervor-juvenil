@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 export const useMediaQueryScreen = (query = '(min-width: 576px)') => {
-  const [ mQuery, setMQuery ] = useState({
+  const [mQuery, setMQuery] = useState({
     matches: window.matchMedia(query).matches
   })
 
