@@ -17,10 +17,7 @@ function App() {
         <Routes>
           <Route path={AUTH_ROUTES.LOGIN} element={<LoginForm />} />
           {/* HOME */}
-          <Route
-            path='/'
-            element={<Navigate to={USERS_ROUTES.INDEX} />}
-          />
+          <Route path="/" element={<Navigate to={USERS_ROUTES.INDEX} />} />
           <Route element={<PrivateRoute />}>
             <Route path={USERS_ROUTES.INDEX} element={<UserProfile />} />
           </Route>

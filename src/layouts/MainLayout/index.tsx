@@ -8,16 +8,16 @@ import { USERS_ROUTES } from '../../modules/users/routes'
 import fervorLogo from '/fj.svg'
 
 interface ILayout {
-    children: React.ReactNode
+  children: React.ReactNode
 }
 export const MAIN_MENU_WIDTH = '280px'
 export const MAIN_MENU_HEIGHT = '72px'
 
 export const MainLayout = ({ children }: ILayout) => (
-  <>
+  <div className="flex flex-col h-screen overflow-hidden bg-gray-50">
     <MainMenu />
-    <main>{children}</main>
-  </>
+    <main className="flex-1 overflow-auto">{children}</main>
+  </div>
 )
 
 const MainMenu = () => {
@@ -26,15 +26,19 @@ const MainMenu = () => {
   const navigateToIndex = () => navigate(USERS_ROUTES.INDEX)
 
   return (
-    <nav className={cn('p-3 px-4 flex w-full justify-between',
-      'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500'
-    )}
-    style={{ height: MAIN_MENU_HEIGHT }}>
-      <div onClick={navigateToIndex}>
-        <img src={fervorLogo} className="rounded cursor-pointer w-10" alt="Logo FJ" height={10} />
+    <nav
+      className={cn(
+        'px-6 py-4 flex w-full justify-between items-center',
+        'bg-white border-b border-gray-200 shadow-sm'
+      )}
+      style={{ height: MAIN_MENU_HEIGHT }}
+    >
+      <div onClick={navigateToIndex} className="cursor-pointer flex items-center gap-3">
+        <img src={fervorLogo} className="rounded-lg w-10 h-10" alt="Logo FJ" />
+        <span className="font-semibold text-lg text-gray-800">TailAdmin</span>
       </div>
-      <Button onClick={logOut}>
-                Cerrar sesión
+      <Button onClick={logOut} variant="secondary" size="sm">
+        Cerrar sesión
       </Button>
     </nav>
   )
