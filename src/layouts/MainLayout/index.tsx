@@ -36,7 +36,7 @@ export const MainLayout = ({ children }: ILayout) => {
         <Topbar />
 
         {/* Main Content Area */}
-        <main className="p-4 pb-20 mx-auto max-w-(--breakpoint-2xl) md:p-6 md:pb-24 bg-gray-50">
+        <main className="p-4 pb-20 mx-auto max-w-(--breakpoint-2xl) md:p-6 md:pb-24">
           {children}
         </main>
       </div>
