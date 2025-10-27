@@ -34,9 +34,6 @@ export function Sidebar({ className }: SidebarProps) {
   useEffect(() => {
     if (isDesktop) return
 
-    // Prevenir scroll cuando está abierto en mobile
-    document.body.style.overflow = isOpen ? 'hidden' : ''
-
     // Cerrar con Escape
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) close()
@@ -59,7 +56,7 @@ export function Sidebar({ className }: SidebarProps) {
       {/* Overlay for mobile */}
       {isOpen && !isDesktop && (
         <div
-          className="fixed inset-0 z-35 bg-black/50 xl:hidden"
+          className="fixed inset-0 z-35 bg-black/50 xl:hidden h-screen"
           onClick={close}
           aria-hidden="true"
         />
@@ -81,6 +78,7 @@ export function Sidebar({ className }: SidebarProps) {
           !isDesktop ? (isOpen ? 'translate-x-0' : '-translate-x-full') : '',
           className
         )}
+        style={{ height: 'calc(100vh) - 64px' }}
       >
         {/* Header */}
         <div

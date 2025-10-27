@@ -26,7 +26,7 @@ export function RoleProtectedRoute({
   if (!hasAnyRole(user, allowedRoles)) {
     // User is logged in but doesn't have permission
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="flex items-center justify-center bg-gray-50">
         <div className="rounded-2xl bg-white p-8 shadow-sm border border-gray-100 max-w-md text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Acceso Denegado</h1>
           <p className="text-gray-600 mb-6">No tienes permisos para acceder a esta página.</p>

@@ -34,7 +34,7 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 animate-fadeIn">
+    <div className="bg-gray-50 flex items-center justify-center p-4 animate-fadeIn">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
         <div className="w-full flex justify-center mb-8">
           <img src={fervorLogo} alt="Logo Fervor Juvenil" className="w-32" />
