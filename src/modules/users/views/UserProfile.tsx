@@ -15,27 +15,35 @@ const getRandomAvatar = () => {
 const UserView = () => {
   const { user } = useLogin()
   // TODO: manejar el user en null
-  if(!user) return <div>No tienes acceso a esta página</div>
+  if (!user) return <div>No tienes acceso a esta página</div>
 
   return (
-    <div className="px-6 max-w-5xl mx-auto space-y-6 animate-fadeIn">
-      <h1 className="text-xl font-bold text-gray-800 pt-4">Perfil</h1>
-      <Card>
+    <div className="px-6 py-6 max-w-5xl mx-auto space-y-6 animate-fadeIn">
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Perfil</h1>
+          <p className="text-sm text-gray-500 mt-1">Administra tu información personal</p>
+        </div>
+      </div>
+
+      <Card variant="elevated">
         <div className="flex items-center space-x-4">
           <UserProfileIcon
             img={{
-              alt: user.name,
+              alt: user.name ?? `${user.firstName} ${user.lastName}`,
               src: user.imageUrl ?? getRandomAvatar()
             }}
           />
           <div>
-            <h2 className="text-lg font-semibold">{user.name}</h2>
-            <p className="text-sm text-gray-500">
-                            Administrador
-            </p>
+            <h2 className="text-xl font-semibold text-gray-900">
+              {user.name ?? `${user.firstName} ${user.lastName}`}
+            </h2>
+            <p className="text-sm text-gray-500 mt-0.5">Administrador</p>
+            <p className="text-sm text-indigo-600 mt-1">{user.email}</p>
           </div>
         </div>
       </Card>
+
       <SectionCard title="Información personal" onEdit={() => alert('Edit personal info')}>
         <Field label="Nombres" value={user.firstName} />
         <Field label="Apellidos" value={user.lastName} />
@@ -43,6 +51,7 @@ const UserView = () => {
         <Field label="Teléfono/Celular" value={user.phone} />
         <Field label="Procedencia" value="Nueva York" />
       </SectionCard>
+
       <SectionCard title="Información de residencia" onEdit={() => alert('Edit personal info')}>
         <Field label="Centro poblado" value={user.firstName} />
         <Field label="País" value={user.lastName} />

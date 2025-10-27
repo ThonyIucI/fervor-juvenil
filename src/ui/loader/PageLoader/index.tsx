@@ -1,7 +1,5 @@
-import React from "react";
+import React from 'react'
 
 export const PageLoader: React.FC = () => {
-    return (
-        <div className="loader" />
-    );
-};
+  return <div className="loader" />
+}

@@ -7,7 +7,7 @@ export function IconButton({
   className,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-    children: ReactNode
+  children: ReactNode
 }) {
   return (
     <button

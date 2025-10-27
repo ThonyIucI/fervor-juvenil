@@ -1,41 +1,48 @@
-import { useNavigate } from 'react-router-dom'
-
-import { Button } from '../../@common/components/Button'
-import { cn } from '../../@common/utils/cn'
-import useLogin from '../../modules/auth/hooks/useLogin'
-import { USERS_ROUTES } from '../../modules/users/routes'
-
-import fervorLogo from '/fj.svg'
+import { useSidebarState } from '@/state/useSidebarState'
+import { Sidebar } from '@common/components/Sidebar/Sidebar'
+import { ToastContainer } from '@common/components/Toast/ToastContainer'
+import { Topbar } from '@common/components/Topbar/Topbar'
+import { cn } from '@common/utils/cn'
 
 interface ILayout {
-    children: React.ReactNode
+  children: React.ReactNode
 }
-export const MAIN_MENU_WIDTH = '280px'
-export const MAIN_MENU_HEIGHT = '72px'
 
-export const MainLayout = ({ children }: ILayout) => (
-  <>
-    <MainMenu />
-    <main>{children}</main>
-  </>
-)
-
-const MainMenu = () => {
-  const navigate = useNavigate()
-  const { logOut } = useLogin()
-  const navigateToIndex = () => navigate(USERS_ROUTES.INDEX)
+/**
+ * MainLayout
+ *
+ * Layout principal de la aplicación autenticada.
+ * - Desktop: El contenido principal ajusta su margin-left según el ancho del sidebar (290px expandido, 90px colapsado)
+ * - Mobile: El sidebar es un overlay, por lo que no afecta el layout del contenido principal
+ */
+export const MainLayout = ({ children }: ILayout) => {
+  const { isOpen } = useSidebarState()
 
   return (
-    <nav className={cn('p-3 px-4 flex w-full justify-between',
-      'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500'
-    )}
-    style={{ height: MAIN_MENU_HEIGHT }}>
-      <div onClick={navigateToIndex}>
-        <img src={fervorLogo} className="rounded cursor-pointer w-10" alt="Logo FJ" height={10} />
+    <div className="min-h-screen md:flex">
+      {/* Sidebar - Fixed en desktop, overlay en mobile */}
+      <Sidebar />
+
+      {/* Main Content - Con margin-left solo en desktop según el ancho del sidebar */}
+      <div
+        className={cn(
+          'flex-1 transition-all duration-300 ease-in-out',
+          // Desktop: margin-left según estado del sidebar
+          // isOpen = true → expandido (290px), isOpen = false → colapsado (90px)
+          isOpen ? 'xl:ml-[290px]' : 'xl:ml-[90px]'
+        )}
+      >
+        {/* Topbar sticky */}
+        <Topbar />
+
+        {/* Main Content Area */}
+        <main className="p-4 pb-20 mx-auto max-w-(--breakpoint-2xl) md:p-6 md:pb-24">
+          {children}
+        </main>
       </div>
-      <Button onClick={logOut}>
-                Cerrar sesión
-      </Button>
-    </nav>
+
+      {/* Global Toast Notifications */}
+      <ToastContainer />
+    </div>
   )
 }

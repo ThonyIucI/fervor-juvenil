@@ -7,10 +7,13 @@ import { AUTH_ROUTES } from '../modules/auth/routes'
 const PrivateRoute = () => {
   const { user } = useLogin()
 
-  if(!user)
-    return <Navigate to={AUTH_ROUTES.LOGIN} />
+  if (!user) return <Navigate to={AUTH_ROUTES.LOGIN} />
 
-  return <MainLayout> <Outlet /></MainLayout>
+  return (
+    <MainLayout>
+      <Outlet />
+    </MainLayout>
+  )
 }
 
 export default PrivateRoute

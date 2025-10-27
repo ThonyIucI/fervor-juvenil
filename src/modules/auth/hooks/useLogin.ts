@@ -1,48 +1,63 @@
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { useUserState } from '../../../state/useUserState'
-import { USERS_ROUTES } from '../../users/routes'
+import { useTokenState } from '@/state/useTokenState'
+import { useUserState } from '@/state/useUserState'
+import { useToast } from '@common/hooks/useToast'
+import { USERS_ROUTES } from '@modules/users/routes'
+
 import { AUTH_ROUTES } from '../routes'
 import { loginUser } from '../services'
 import type { ILoginInputs } from '../types/Login'
-import { getAccessToken } from '../utils'
 
 const useLogin = () => {
-  const [ isLoading, setIsLoading ] = useState(false)
-  const [ loginErros, setLoginErrors ] = useState<ILoginInputs | null>(null)
-  const accessToken = getAccessToken()
-  const setToken = (token: string) => localStorage.setItem('accessToken', token)
+  const [loginErros, setLoginErrors] = useState<ILoginInputs | null>(null)
+  const { accessToken, setToken } = useTokenState()
   const { user, setUser } = useUserState()
-
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const toast = useToast()
+
   const handleLogin = useCallback(
-    async (LoginInputs: ILoginInputs) => {
-      setIsLoading(true)
+    async (loginInputs: ILoginInputs) => {
+      setLoginErrors(null)
+
       try {
-        const { data } = await loginUser(LoginInputs)
+        const response = await loginUser(loginInputs)
+        const loginData = response.data.data
 
-        if(!data?.accessToken || !data?.user) return logOut()
+        if (!loginData?.accessToken || !loginData?.user) {
+          toast.error('Respuesta de login inválida')
+          return logOut()
+        }
 
-        setToken(data.accessToken)
-        setUser(data.user)
-        navigate(USERS_ROUTES.INDEX)
-      } catch (err: any) {
-        setLoginErrors(err?.response?.data?.errors)
+        // Map roles array to user.roles
+        const userWithRoles = {
+          ...loginData.user,
+          roles: loginData.roles?.map((role) => role.name) || []
+        }
+
+        setToken(loginData.accessToken)
+        setUser(userWithRoles)
+        toast.success('¡Bienvenido Fervorino!')
+        navigate(USERS_ROUTES.PROFILE)
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { errors?: ILoginInputs } } }
+        setLoginErrors(error?.response?.data?.errors ?? null)
       } finally {
-        setIsLoading(false)
+        setLoading(false)
       }
     },
-    []
+    [setToken, setUser, navigate, toast]
   )
 
-  const logOut = () => {
+  const logOut = useCallback(() => {
     setToken('')
     setUser(null)
     navigate(AUTH_ROUTES.LOGIN)
-  }
+  }, [setToken, setUser, navigate])
 
-  return { loginErros, isLoading, handleLogin, accessToken, user, logOut }
+  return { loginErros, isLoading: loading, handleLogin, accessToken, user, logOut }
 }
 
 export default useLogin
