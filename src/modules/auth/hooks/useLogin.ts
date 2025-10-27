@@ -20,7 +20,7 @@ const useLogin = () => {
     setIsLoading(true)
     try {
       const response = await loginUser(LoginInputs)
-      const loginData = response.data // { accessToken, user, roles }
+      const loginData = response.data.data // { accessToken, user, roles }
 
       if (!loginData?.accessToken || !loginData?.user) {
         console.error('Invalid login response:', loginData)

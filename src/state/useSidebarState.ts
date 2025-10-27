@@ -2,25 +2,23 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 interface SidebarState {
-  isCollapsed: boolean
-  isMobileOpen: boolean
-  toggleCollapsed: () => void
-  toggleMobileOpen: () => void
-  closeMobile: () => void
+  isOpen: boolean
+  toggle: () => void
+  open: () => void
+  close: () => void
 }
 
 export const useSidebarState = create<SidebarState>()(
   persist(
     (set) => ({
-      isCollapsed: false,
-      isMobileOpen: false,
-      toggleCollapsed: () => set((state) => ({ isCollapsed: !state.isCollapsed })),
-      toggleMobileOpen: () => set((state) => ({ isMobileOpen: !state.isMobileOpen })),
-      closeMobile: () => set({ isMobileOpen: false })
+      isOpen: false,
+      toggle: () => set((state) => ({ isOpen: !state.isOpen })),
+      open: () => set({ isOpen: true }),
+      close: () => set({ isOpen: false })
     }),
     {
       name: 'sidebar-state',
-      partialize: (state) => ({ isCollapsed: state.isCollapsed }) // Solo persistir collapsed
+      partialize: (state) => ({ isOpen: state.isOpen })
     }
   )
 )
