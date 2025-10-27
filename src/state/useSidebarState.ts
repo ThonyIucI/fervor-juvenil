@@ -14,11 +14,9 @@ const getInitialSidebarState = (): boolean => {
   return window.innerWidth >= 1280
 }
 
-export const useSidebarState = create<SidebarState>()(
-  (set) => ({
-    isOpen: getInitialSidebarState(),
-    toggle: () => set((state) => ({ isOpen: !state.isOpen })),
-    open: () => set({ isOpen: true }),
-    close: () => set({ isOpen: false })
-  })
-)
+export const useSidebarState = create<SidebarState>()((set) => ({
+  isOpen: getInitialSidebarState(),
+  toggle: () => set((state) => ({ isOpen: !state.isOpen })),
+  open: () => set({ isOpen: true }),
+  close: () => set({ isOpen: false })
+}))

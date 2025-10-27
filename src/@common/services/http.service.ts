@@ -1,6 +1,8 @@
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import axios, { AxiosError } from 'axios'
 
+import { AUTH_ROUTES } from '@modules/auth/routes'
+
 import { getAccessToken } from '../../modules/auth/utils'
 import { API_URL_V1 } from '../env'
 import type { ApiErrorResponse, ApiResponse } from '../types/api'
@@ -61,9 +63,14 @@ export class HttpService {
       },
       async (error: AxiosError<ApiErrorResponse>) => {
         if (error.response?.status === 401) {
-          // Handle unauthorized - clear token and redirect to login
+          // Handle unauthorized - clear all auth data and redirect to login
           localStorage.removeItem('token')
-          window.location.href = '/login'
+          localStorage.removeItem('user')
+
+          // Redirigir solo si no estamos ya en login
+          if (!window.location.pathname.includes(AUTH_ROUTES.LOGIN)) {
+            window.location.href = AUTH_ROUTES.LOGIN
+          }
         }
 
         if (error.response?.status === 403) {
