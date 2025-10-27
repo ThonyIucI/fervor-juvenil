@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Heart, MapPin, Shirt, Star, User } from 'lucide-react'
 
-import { useRequest } from '@/@common/hooks/useRequest';
+import { useRequest } from '@/@common/hooks/useRequest'
 import { Loader } from '@common/components/Loader'
 
 import { ProfileFieldDisplay } from '../Components/ProfileFieldDisplay'
@@ -11,12 +11,7 @@ import { ProfileService } from '../services/profile.service'
 import type { IUserWithProfile } from '../types/Profile'
 import { formatDate, formatDateShort } from '../utils/dateUtils'
 
-
-export const CANCEL_MESSAGE = "canceled due to new request";
-
-
-
-
+export const CANCEL_MESSAGE = 'canceled due to new request'
 
 export default function ProfileView() {
   const GetProfile = useRequest<IUserWithProfile>(false, async () => {
@@ -47,7 +42,6 @@ export default function ProfileView() {
       </div>
     )
   }
-
 
   return (
     <div className="space-y-6 pb-8">
@@ -142,11 +136,7 @@ export default function ProfileView() {
         {/* Sizes */}
         <ProfileSection title="Tallas" icon={<Shirt className="h-5 w-5" />}>
           <dl className="grid grid-cols-2 gap-4">
-            <ProfileFieldDisplay
-              label="¿Tiene Polo?"
-              value={userProfile?.hasUniform}
-              fullWidth
-            />
+            <ProfileFieldDisplay label="¿Tiene Polo?" value={userProfile?.hasUniform} fullWidth />
             <ProfileFieldDisplay label="Talla de Camisa" value={userProfile?.shirtSize} />
             <ProfileFieldDisplay label="Talla de Pantalón" value={userProfile?.pantsSize} />
             <ProfileFieldDisplay label="Talla de Zapato" value={userProfile?.shoeSize} />

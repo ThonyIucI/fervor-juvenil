@@ -3,36 +3,31 @@ import { useNavigate } from 'react-router-dom'
 
 import { useTokenState } from '@/state/useTokenState'
 import { useUserState } from '@/state/useUserState'
-import { useRequest } from '@common/hooks/useRequest'
+import { useToast } from '@common/hooks/useToast'
 import { USERS_ROUTES } from '@modules/users/routes'
 
 import { AUTH_ROUTES } from '../routes'
 import { loginUser } from '../services'
-import type { ILoginInputs, ILoginResponse } from '../types/Login'
+import type { ILoginInputs } from '../types/Login'
 
 const useLogin = () => {
   const [loginErros, setLoginErrors] = useState<ILoginInputs | null>(null)
   const { accessToken, setToken } = useTokenState()
   const { user, setUser } = useUserState()
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-
-  // Use useRequest hook for API call
-  const { execute, isLoading } = useRequest<ILoginResponse, [ILoginInputs]>(
-    async (loginInputs: ILoginInputs) => {
-      const response = await loginUser(loginInputs)
-      return response.data.data
-    }
-  )
+  const toast = useToast()
 
   const handleLogin = useCallback(
     async (loginInputs: ILoginInputs) => {
       setLoginErrors(null)
 
       try {
-        const loginData = await execute(loginInputs)
+        const response = await loginUser(loginInputs)
+        const loginData = response.data.data
 
         if (!loginData?.accessToken || !loginData?.user) {
-          console.error('Invalid login response:', loginData)
+          toast.error('Respuesta de login inválida')
           return logOut()
         }
 
@@ -44,13 +39,16 @@ const useLogin = () => {
 
         setToken(loginData.accessToken)
         setUser(userWithRoles)
+        toast.success('¡Bienvenido Fervorino!')
         navigate(USERS_ROUTES.PROFILE)
       } catch (err: unknown) {
         const error = err as { response?: { data?: { errors?: ILoginInputs } } }
         setLoginErrors(error?.response?.data?.errors ?? null)
+      } finally {
+        setLoading(false)
       }
     },
-    [execute, setToken, setUser, navigate]
+    [setToken, setUser, navigate, toast]
   )
 
   const logOut = useCallback(() => {
@@ -59,7 +57,7 @@ const useLogin = () => {
     navigate(AUTH_ROUTES.LOGIN)
   }, [setToken, setUser, navigate])
 
-  return { loginErros, isLoading, handleLogin, accessToken, user, logOut }
+  return { loginErros, isLoading: loading, handleLogin, accessToken, user, logOut }
 }
 
 export default useLogin
