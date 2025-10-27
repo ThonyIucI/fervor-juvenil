@@ -1,8 +1,11 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 
 import { InputField } from '../../@common/components/InputField'
 import { useBoolean } from '../../@common/hooks/useBoolean'
+import { USERS_ROUTES } from '../users/routes'
 
 import useLogin from './hooks/useLogin'
 import type { ILoginInputs } from './types/Login'
@@ -15,8 +18,17 @@ export default function LoginForm() {
     handleSubmit,
     formState: { errors }
   } = useForm<ILoginInputs>()
-  const { isLoading, handleLogin, loginErros } = useLogin()
+  const { isLoading, handleLogin, loginErros, user } = useLogin()
   const isPasswordType = useBoolean(true)
+  const navigate = useNavigate()
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate(USERS_ROUTES.PROFILE, { replace: true })
+    }
+  }, [user])
+
   const onSubmit = async (data: ILoginInputs) => {
     handleLogin(data)
   }

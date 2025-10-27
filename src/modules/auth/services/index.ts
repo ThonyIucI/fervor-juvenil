@@ -1,11 +1,5 @@
 import { api } from '../../../config/api'
-import type { ILoginInputs } from '../types/Login'
-import type { IUser } from '../types/User'
-
-interface IloginUserResponse {
-  accessToken: string
-  user: IUser
-}
+import type { ILoginInputs, ILoginResponse } from '../types/Login'
 
 export const loginUser = (user: ILoginInputs) =>
-  api.FJ_APIv1.post<IloginUserResponse>('/auth/login', user)
+  api.FJ_APIv1.post<ILoginResponse>('/auth/login', user)

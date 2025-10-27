@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle2, Info,X, XCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Info, X, XCircle } from 'lucide-react'
 
 import type { IToast } from '@/state/useToastState'
 import { useToastState } from '@/state/useToastState'

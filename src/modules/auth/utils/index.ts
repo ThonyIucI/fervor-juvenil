@@ -11,4 +11,4 @@ export const getAccessToken = () => {
 }
 
 // Re-export role utilities
-export { hasAnyRole,hasRole, isAdmin, isSuperAdmin } from './roleUtils'
+export { hasAnyRole, hasRole, isAdmin, isSuperAdmin } from './roleUtils'

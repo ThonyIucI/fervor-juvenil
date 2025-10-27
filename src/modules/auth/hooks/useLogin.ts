@@ -1,31 +1,41 @@
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { useUserState } from '../../../state/useUserState'
-import { USERS_ROUTES } from '../../users/routes'
+import { useTokenState } from '@/state/useTokenState'
+import { useUserState } from '@/state/useUserState'
+import { USERS_ROUTES } from '@modules/users/routes'
+
 import { AUTH_ROUTES } from '../routes'
 import { loginUser } from '../services'
 import type { ILoginInputs } from '../types/Login'
-import { getAccessToken } from '../utils'
 
 const useLogin = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [loginErros, setLoginErrors] = useState<ILoginInputs | null>(null)
-  const accessToken = getAccessToken()
-  const setToken = (token: string) => localStorage.setItem('accessToken', token)
+  const { accessToken, setToken } = useTokenState()
   const { user, setUser } = useUserState()
 
   const navigate = useNavigate()
   const handleLogin = useCallback(async (LoginInputs: ILoginInputs) => {
     setIsLoading(true)
     try {
-      const { data } = await loginUser(LoginInputs)
+      const response = await loginUser(LoginInputs)
+      const loginData = response.data // { accessToken, user, roles }
 
-      if (!data?.accessToken || !data?.user) return logOut()
+      if (!loginData?.accessToken || !loginData?.user) {
+        console.error('Invalid login response:', loginData)
+        return logOut()
+      }
 
-      setToken(data.accessToken)
-      setUser(data.user)
-      navigate(USERS_ROUTES.INDEX)
+      // Map roles array to user.roles
+      const userWithRoles = {
+        ...loginData.user,
+        roles: loginData.roles?.map((role) => role.name) || []
+      }
+
+      setToken(loginData.accessToken)
+      setUser(userWithRoles)
+      navigate(USERS_ROUTES.PROFILE)
     } catch (err: unknown) {
       const error = err as { response?: { data?: { errors?: ILoginInputs } } }
       setLoginErrors(error?.response?.data?.errors ?? null)
