@@ -53,7 +53,10 @@ export function calculateAge(birthDate: string | null): number | null {
  * formatDate('2024-03-01') // '1 de marzo de 2024'
  * formatDate('2024-03-01', 'DD/MM/YYYY') // '01/03/2024'
  */
-export function formatDate(isoDate: string | null, format: string = 'D [de] MMMM [de] YYYY'): string | null {
+export function formatDate(
+  isoDate: string | null,
+  format: string = 'D [de] MMMM [de] YYYY'
+): string | null {
   if (!isoDate) return null
 
   // Use UTC to avoid timezone issues when formatting

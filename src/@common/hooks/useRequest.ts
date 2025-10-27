@@ -1,286 +1,114 @@
-import type { SetStateAction } from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
+import axios from 'axios'
 
-/**
- * Estado de una petición asíncrona
- */
-export interface RequestState<T> {
-  /** Datos retornados por la petición */
-  data: T | null
-  /** Error si la petición falló */
-  error: Error | null
-  /** True si la petición está en progreso */
-  isLoading: boolean
-  /** True si la petición falló */
-  isError: boolean
-  /** True si la petición completó exitosamente */
-  isSuccess: boolean
-  /** True si nunca se ha ejecutado */
-  isIdle: boolean
+interface ErrorResponse {
+  title?: string
+  message?: string
+  reason?: string
+  errors?: Record<string, string[]>
 }
 
-/**
- * Opciones de configuración para useRequest
- */
-export interface UseRequestOptions<T> {
-  /**
-   * Si true, ejecuta la función automáticamente al montar
-   * @default false
-   */
-  immediate?: boolean
+interface ErrorObject {
+  title: string
+  message: string
+  reason?: string
+  active: boolean
+  status?: number
+}
+export const CANCEL_MESSAGE = "canceled due to new request";
 
-  /**
-   * Callback ejecutado cuando hay un error
-   * Útil para logging o mostrar toasts
-   */
-  onError?: (error: Error) => void
-
-  /**
-   * Callback ejecutado cuando la petición es exitosa
-   * Útil para mostrar toasts de confirmación
-   */
-  onSuccess?: (data: T) => void
-
-  /**
-   * Si true, cancela la petición anterior cuando se ejecuta una nueva
-   * Útil para evitar race conditions en búsquedas, tabs, etc.
-   * @default false
-   */
-  cancelPrevious?: boolean
+const getKeysOfObject = (obj: Record<string, unknown>): string[] => {
+  const keys: string[] = []
+  for (const k in obj) {
+    keys.push(k)
+  }
+  return keys
 }
 
-/**
- * Valor de retorno del hook useRequest
- */
-export interface UseRequestReturn<T, Args extends unknown[]> {
-  /** Estado actual de la petición */
-  data: T | null
-  error: Error | null
-  isLoading: boolean
-  isError: boolean
-  isSuccess: boolean
-  isIdle: boolean
-
-  /**
-   * Ejecuta la función asíncrona con los argumentos dados
-   * @returns Promise con el resultado o lanza error
-   */
-  execute: (...args: Args) => Promise<T>
-
-  /**
-   * Reinicia el estado a valores iniciales
-   */
-  reset: () => void
-
-  /**
-   * Actualiza manualmente los datos (para optimistic updates)
-   */
-  setData: (value: SetStateAction<T | null>) => void
-
-  /**
-   * Actualiza manualmente el error
-   */
-  setError: (value: SetStateAction<Error | null>) => void
-}
-
-/**
- * Hook para manejar peticiones asíncronas con estados, cancelación y callbacks
- *
- * @example
- * // Básico
- * const { data, isLoading, execute } = useRequest(fetchUsers)
- * useEffect(() => { execute() }, [])
- *
- * @example
- * // Con argumentos
- * const { data, execute } = useRequest(fetchUserById)
- * const handleClick = () => execute(userId)
- *
- * @example
- * // Immediate + callbacks (sin argumentos)
- * const { data } = useRequest(() => fetchUsers(), {
- *   immediate: true,
- *   onSuccess: (users) => toast.success(`${users.length} users loaded`),
- *   onError: (err) => toast.error(err.message)
- * })
- *
- * @example
- * // Con cancelación (búsqueda)
- * const { data, execute } = useRequest(searchUsers, { cancelPrevious: true })
- * const debouncedSearch = useDebounce(search, 300)
- * useEffect(() => { execute(debouncedSearch) }, [debouncedSearch])
- *
- * @example
- * // Optimistic update
- * const { data, setData, execute } = useRequest(likePost)
- * const handleLike = async () => {
- *   setData(prev => ({ ...prev, liked: true }))
- *   try {
- *     await execute(postId)
- *   } catch {
- *     setData(prev => ({ ...prev, liked: false }))
- *   }
- * }
- */
-export function useRequest<T, Args extends unknown[] = []>(
-  asyncFunction: (...args: Args) => Promise<T>,
-  options: UseRequestOptions<T> = {}
-): UseRequestReturn<T, Args> {
-  const { immediate = false, onError, onSuccess, cancelPrevious = false } = options
-
-  // Estado
-  const [state, setState] = useState<RequestState<T>>({
-    data: null,
-    error: null,
-    isLoading: false,
-    isError: false,
-    isSuccess: false,
-    isIdle: true
+const getMessageString = (error: { response: { data: { errors: Record<string, string[]> } } }): string => {
+  let aux = ''
+  getKeysOfObject(error.response.data.errors).map((k) => {
+    return error.response.data.errors[k].map((i) => {
+      aux += `${i} `
+    })
   })
+  return aux
+}
 
-  // Referencias para evitar re-renders y race conditions
-  const isMountedRef = useRef(true)
-  const abortControllerRef = useRef<AbortController | undefined>(undefined)
-  const asyncFunctionRef = useRef(asyncFunction)
-
-  // Actualizar referencia sin causar re-ejecución
-  useEffect(() => {
-    asyncFunctionRef.current = asyncFunction
-  }, [asyncFunction])
-
-  // Cleanup al desmontar
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false
-      abortControllerRef.current?.abort()
-    }
-  }, [])
-
-  /**
-   * Ejecuta la función asíncrona con manejo de estados
-   */
-  const execute = useCallback(
-    async (...args: Args): Promise<T> => {
-      // Cancelar petición anterior si está configurado
-      if (cancelPrevious) {
-        abortControllerRef.current?.abort()
-        abortControllerRef.current = new AbortController()
+const getErrorFromError = (error: unknown): ErrorObject => {
+  switch (typeof error) {
+    case 'object':
+      if (error && 'response' in error) {
+        const axiosError = error as { response?: { data?: ErrorResponse; status?: number } }
+        if (axiosError.response) {
+          if (axiosError.response.data) {
+            const title = axiosError.response.data.title ? axiosError.response.data.title : 'Ocurrió un error'
+            const message = axiosError.response.data.errors
+              ? getMessageString(error as { response: { data: { errors: Record<string, string[]> } } })
+              : axiosError.response.data.message || ''
+            const reason = axiosError.response.data.reason ? axiosError.response.data.reason : ''
+            return { title, message, reason, active: true, status: axiosError.response.status }
+          }
+        }
+      } else {
+        if (!navigator.onLine) {
+          return {
+            title: 'No tienes conexión a internet',
+            message: 'Conéctate a internet para continuar.',
+            active: true
+          }
+        }
+        const err = error as Error
+        return { title: err.message, message: err.message, active: true }
       }
+      break
+    case 'string':
+      return { title: 'Ocurrió un error', message: error, active: true }
+  }
 
-      // Actualizar estado a loading
-      if (isMountedRef.current) {
-        setState({
-          data: null,
-          error: null,
-          isLoading: true,
-          isError: false,
-          isSuccess: false,
-          isIdle: false
-        })
-      }
+  return { title: 'Error desconocido', message: 'Ocurrió un error inesperado', active: true }
+}
 
+export const useRequest = <T = unknown, Args extends unknown[] = unknown[]>(
+  initiallyLoading?: boolean | null,
+  func?: (...args: Args) => Promise<T>,
+  onError?: (errMessage?: string, err?: unknown) => void
+) => {
+  const notHandleLoading = initiallyLoading === null
+  const [loading, setLoading] = useState(initiallyLoading || false)
+  const [error, setError] = useState<unknown>(null)
+  const [data, setData] = useState<T | null>(null)
+  const cancelToken = useRef(axios.CancelToken.source())
+
+  const handleRequest = useCallback(
+    async (func: (axiosCancelToken?: unknown) => Promise<T>, onError?: (errMessage?: string, err?: unknown) => void) => {
+      cancelToken.current.cancel(CANCEL_MESSAGE)
+      cancelToken.current = axios.CancelToken.source()
+
+      if (!notHandleLoading) setLoading(true)
+      setError(null)
       try {
-        // Ejecutar función asíncrona
-        const result = await asyncFunctionRef.current(...args)
-
-        // Solo actualizar si el componente está montado
-        if (isMountedRef.current) {
-          setState({
-            data: result,
-            error: null,
-            isLoading: false,
-            isError: false,
-            isSuccess: true,
-            isIdle: false
-          })
-
-          // Callback de éxito
-          onSuccess?.(result)
-        }
-
+        const result = await func(cancelToken.current)
+        setData(result)
         return result
-      } catch (error) {
-        const err = error instanceof Error ? error : new Error(String(error))
-
-        // Solo actualizar si el componente está montado
-        if (isMountedRef.current) {
-          setState({
-            data: null,
-            error: err,
-            isLoading: false,
-            isError: true,
-            isSuccess: false,
-            isIdle: false
-          })
-
-          // Callback de error
-          onError?.(err)
+      } catch (err) {
+        const { message, title } = getErrorFromError(err)
+        if (message === CANCEL_MESSAGE) return
+        if (onError) {
+          onError(message || title, err)
         }
-
-        // Re-lanzar el error para que el componente pueda manejarlo
+        setError(err)
         throw err
+      } finally {
+        if (!notHandleLoading) setLoading(false)
       }
     },
-    [cancelPrevious, onError, onSuccess]
+    [notHandleLoading]
   )
 
-  /**
-   * Reinicia el estado a valores iniciales
-   */
-  const reset = useCallback(() => {
-    abortControllerRef.current?.abort()
-    setState({
-      data: null,
-      error: null,
-      isLoading: false,
-      isError: false,
-      isSuccess: false,
-      isIdle: true
-    })
-  }, [])
-
-  /**
-   * Actualiza manualmente los datos
-   */
-  const setData = useCallback((dataOrUpdater: SetStateAction<T | null>) => {
-    setState((prev) => ({
-      ...prev,
-      data:
-        typeof dataOrUpdater === 'function'
-          ? (dataOrUpdater as (prev: T | null) => T | null)(prev.data)
-          : dataOrUpdater
-    }))
-  }, [])
-
-  /**
-   * Actualiza manualmente el error
-   */
-  const setError = useCallback((errorOrUpdater: SetStateAction<Error | null>) => {
-    setState((prev) => ({
-      ...prev,
-      error:
-        typeof errorOrUpdater === 'function'
-          ? (errorOrUpdater as (prev: Error | null) => Error | null)(prev.error)
-          : errorOrUpdater,
-      isError: errorOrUpdater !== null
-    }))
-  }, [])
-
-  // Ejecución inmediata (solo una vez al montar)
-  useEffect(() => {
-    if (immediate) {
-      // @ts-expect-error - immediate solo debe usarse con funciones sin argumentos requeridos
-      void execute()
-    }
-    // Solo al montar, no incluir execute en las dependencias
-     
-  }, [])
-
-  return {
-    ...state,
-    execute,
-    reset,
-    setData,
-    setError
+  const handler = async (...args: Args) => {
+    if (func) return await handleRequest(() => func(...args), onError)
   }
+
+  return { loading, error, data, handleRequest, handler, setData, cancelTokenRef: cancelToken }
 }

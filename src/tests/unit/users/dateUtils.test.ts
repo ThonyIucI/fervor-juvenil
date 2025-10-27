@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { calculateAge, formatDate, formatDateShort, toISODate } from '@modules/users/utils/dateUtils'
+import {
+  calculateAge,
+  formatDate,
+  formatDateShort,
+  toISODate
+} from '@modules/users/utils/dateUtils'
 
 describe('dateUtils', () => {
   describe('calculateAge', () => {

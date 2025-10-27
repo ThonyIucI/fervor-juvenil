@@ -1,108 +1,187 @@
-import { Mail, Tag, User } from 'lucide-react'
+import { useEffect } from 'react'
+import { Heart, MapPin, Shirt, Star, User } from 'lucide-react'
 
-import { useUserState } from '@/state/useUserState'
-import { Card } from '@common/components/Card'
+import { useRequest } from '@/@common/hooks/useRequest';
+import { Loader } from '@common/components/Loader'
+
+import { ProfileFieldDisplay } from '../Components/ProfileFieldDisplay'
+import { ProfileHeader } from '../Components/ProfileHeader'
+import { ProfileSection } from '../Components/ProfileSection'
+import { ProfileService } from '../services/profile.service'
+import type { IUserWithProfile } from '../types/Profile'
+import { formatDate, formatDateShort } from '../utils/dateUtils'
+
+
+export const CANCEL_MESSAGE = "canceled due to new request";
+
+
+
+
 
 export default function ProfileView() {
-  const { user } = useUserState()
+  const GetProfile = useRequest<IUserWithProfile>(false, async () => {
+    const response = await ProfileService.getMyProfile()
+    return response.data.data
+  })
 
-  if (!user) {
+  useEffect(() => {
+    GetProfile.handler()
+  }, [])
+
+  if (GetProfile.loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-500">No hay información de usuario disponible</p>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader size="lg" />
+      </div>
+    )
+  }
+  const profile = GetProfile.data
+  const userProfile = profile?.profile
+  if (!profile) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-500 text-lg">No se pudo cargar la información del perfil</p>
+          <p className="text-gray-400 text-sm mt-2">Intenta recargar la página</p>
+        </div>
       </div>
     )
   }
 
+
   return (
-    <>
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Mi Perfil</h1>
+    <div className="space-y-6 pb-8">
+      <h1 className="text-3xl font-bold text-gray-900">Mi Perfil</h1>
 
-      {/* Profile Card */}
-      <Card variant="elevated" className="p-6">
-        <div className="flex items-center gap-6 mb-6">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-indigo-100">
-            <User className="h-10 w-10 text-indigo-600" />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {user.firstName} {user.lastName}
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">@{user.slug}</p>
-          </div>
-        </div>
+      {/* Header with basic info */}
+      <ProfileHeader user={profile} />
 
-        {/* User Information */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 text-gray-700">
-            <Mail className="h-5 w-5 text-gray-400" />
-            <div>
-              <p className="text-xs text-gray-500 font-medium">Email</p>
-              <p className="text-sm">{user.email}</p>
-            </div>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Personal Information */}
+        <ProfileSection title="Datos Personales" icon={<User className="h-5 w-5" />}>
+          <dl className="grid grid-cols-2 gap-4">
+            <ProfileFieldDisplay
+              label="Nombres Completos"
+              value={userProfile?.firstNames}
+              fullWidth
+            />
+            <ProfileFieldDisplay
+              label="Apellidos Completos"
+              value={userProfile?.lastNames}
+              fullWidth
+            />
+            <ProfileFieldDisplay label="Alias" value={userProfile?.alias} />
+            <ProfileFieldDisplay
+              label="Género"
+              value={
+                userProfile?.gender === 'M'
+                  ? 'Masculino'
+                  : userProfile?.gender === 'F'
+                    ? 'Femenino'
+                    : null
+              }
+            />
+            <ProfileFieldDisplay
+              label="Fecha de Nacimiento"
+              value={userProfile?.birthDate ? formatDate(userProfile.birthDate) : null}
+              fullWidth
+            />
+            <ProfileFieldDisplay
+              label="Fecha de Registro"
+              value={
+                userProfile?.enrollmentDate ? formatDateShort(userProfile.enrollmentDate) : null
+              }
+            />
+            <ProfileFieldDisplay
+              label="Fecha de Inscripción"
+              value={
+                userProfile?.enrollmentDate ? formatDateShort(userProfile.enrollmentDate) : null
+              }
+            />
+          </dl>
+        </ProfileSection>
 
-          <div className="flex items-center gap-3 text-gray-700">
-            <Tag className="h-5 w-5 text-gray-400" />
-            <div>
-              <p className="text-xs text-gray-500 font-medium">Roles</p>
-              <div className="flex gap-2 mt-1">
-                {user.roles && user.roles.length > 0 ? (
-                  user.roles.map((role) => (
-                    <span
-                      key={role}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-                    >
-                      {role}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-sm text-gray-500">Sin roles asignados</span>
-                )}
-              </div>
-            </div>
-          </div>
+        {/* Contact */}
+        <ProfileSection title="Contacto" icon={<MapPin className="h-5 w-5" />}>
+          <dl className="grid grid-cols-1 gap-4">
+            <ProfileFieldDisplay label="Correo Electrónico" value={profile.email} fullWidth />
+            <ProfileFieldDisplay
+              label="Residencia Actual"
+              value={userProfile?.currentResidence}
+              fullWidth
+            />
+          </dl>
+        </ProfileSection>
 
-          <div className="flex items-center gap-3 text-gray-700">
-            <User className="h-5 w-5 text-gray-400" />
-            <div>
-              <p className="text-xs text-gray-500 font-medium">ID de Usuario</p>
-              <p className="text-sm font-mono text-gray-600">{user.uuid}</p>
-            </div>
-          </div>
-        </div>
-      </Card>
+        {/* Health Information */}
+        <ProfileSection title="Información de Salud" icon={<Heart className="h-5 w-5" />}>
+          <dl className="grid grid-cols-2 gap-4">
+            <ProfileFieldDisplay
+              label="Seguro de Salud"
+              value={userProfile?.healthInsurance}
+              fullWidth
+            />
+            <ProfileFieldDisplay label="Tipo de Sangre" value={userProfile?.bloodType} />
+            <ProfileFieldDisplay
+              label="Altura (m)"
+              value={userProfile?.heightMeters ? `${userProfile.heightMeters} m` : null}
+            />
+            <ProfileFieldDisplay
+              label="Peso (kg)"
+              value={userProfile?.weightKg ? `${userProfile.weightKg} kg` : null}
+            />
+            <ProfileFieldDisplay label="Alergias" value={userProfile?.allergies} fullWidth />
+            <ProfileFieldDisplay
+              label="Discapacidad o Trastorno"
+              value={userProfile?.disabilityOrDisorder}
+              fullWidth
+            />
+          </dl>
+        </ProfileSection>
 
-      {/* Additional Information Section */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card variant="outlined" className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Información Personal</h3>
-          <div className="space-y-3">
-            <div>
-              <p className="text-xs text-gray-500 font-medium">Nombre</p>
-              <p className="text-sm text-gray-900">{user.firstName}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 font-medium">Apellido</p>
-              <p className="text-sm text-gray-900">{user.lastName}</p>
-            </div>
-          </div>
-        </Card>
+        {/* Sizes */}
+        <ProfileSection title="Tallas" icon={<Shirt className="h-5 w-5" />}>
+          <dl className="grid grid-cols-2 gap-4">
+            <ProfileFieldDisplay
+              label="¿Tiene Polo?"
+              value={userProfile?.hasUniform}
+              fullWidth
+            />
+            <ProfileFieldDisplay label="Talla de Camisa" value={userProfile?.shirtSize} />
+            <ProfileFieldDisplay label="Talla de Pantalón" value={userProfile?.pantsSize} />
+            <ProfileFieldDisplay label="Talla de Zapato" value={userProfile?.shoeSize} />
+          </dl>
+        </ProfileSection>
 
-        <Card variant="outlined" className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Seguridad</h3>
-          <div className="space-y-3">
-            <div>
-              <p className="text-xs text-gray-500 font-medium">Email Verificado</p>
-              <p className="text-sm text-green-600">✓ Verificado</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 font-medium">Último Acceso</p>
-              <p className="text-sm text-gray-900">Hoy</p>
-            </div>
-          </div>
-        </Card>
+        {/* Additional Information */}
+        <ProfileSection
+          title="Información Adicional"
+          icon={<Star className="h-5 w-5" />}
+          className="lg:col-span-2"
+        >
+          <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <ProfileFieldDisplay
+              label="Meta Profesional"
+              value={userProfile?.professionalGoal}
+              fullWidth
+            />
+            <ProfileFieldDisplay
+              label="Superhéroe Favorito"
+              value={userProfile?.favoriteHero}
+              fullWidth
+            />
+          </dl>
+        </ProfileSection>
       </div>
-    </>
+
+      {/* Empty state for profile not created */}
+      {!userProfile && (
+        <div className="mt-8 text-center p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+          <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Perfil Incompleto</h3>
+          <p className="text-gray-500">Completa tu perfil para que podamos conocerte mejor</p>
+        </div>
+      )}
+    </div>
   )
 }
