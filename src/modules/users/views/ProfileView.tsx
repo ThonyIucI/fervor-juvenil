@@ -3,7 +3,7 @@ import { Mail, Tag, User } from 'lucide-react'
 import { useUserState } from '@/state/useUserState'
 import { Card } from '@common/components/Card'
 
-export function ProfileView() {
+export default function ProfileView() {
   const { user } = useUserState()
 
   if (!user) {
@@ -15,7 +15,7 @@ export function ProfileView() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <>
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Mi Perfil</h1>
 
       {/* Profile Card */}
@@ -103,6 +103,6 @@ export function ProfileView() {
           </div>
         </Card>
       </div>
-    </div>
+    </>
   )
 }

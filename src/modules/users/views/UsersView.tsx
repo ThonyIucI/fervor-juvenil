@@ -2,7 +2,7 @@ import { Users as UsersIcon } from 'lucide-react'
 
 import { Card } from '@common/components/Card'
 
-export function UsersView() {
+export default function UsersView() {
   return (
     <div className="p-6">
       <div className="mb-6">

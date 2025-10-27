@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LogOut,Menu, User, Users, X } from 'lucide-react'
+import { LogOut, User, Users } from 'lucide-react'
 
-import { useUserState } from '@/state/useUserState'
+import { useSidebarState } from '@/state/useSidebarState'
+import { Button } from '@common/components/Button'
+import { useMediaQueryScreen } from '@common/hooks/useMediaQueryScreen'
 import { cn } from '@common/utils/cn'
 import useLogin from '@modules/auth/hooks/useLogin'
+
+import fervorLogo from '/fj.svg'
 
 interface SidebarProps {
   className?: string
@@ -22,80 +26,71 @@ const navItems: NavItem[] = [
 ]
 
 export function Sidebar({ className }: SidebarProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const { user } = useUserState()
   const { logOut } = useLogin()
+  const { isCollapsed, isMobileOpen, closeMobile } = useSidebarState()
+  const { status: isDesktop } = useMediaQueryScreen('(min-width: 1280px)')
+  const isMobile = !isDesktop
 
-  const closeSidebar = () => {
-    setIsOpen(false)
-  }
+  // Cerrar mobile al presionar Escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isMobileOpen) {
+        closeMobile()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [isMobileOpen, closeMobile])
+
+  // Prevenir scroll del body en mobile cuando está abierto
+  useEffect(() => {
+    if (isMobileOpen && isMobile) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isMobileOpen, isMobile])
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          'fixed top-4 left-4 z-50 flex items-center justify-center',
-          'rounded-lg bg-white p-2 shadow-md',
-          'hover:bg-gray-50 transition-colors',
-          'md:hidden'
-        )}
-        aria-label={isOpen ? 'Close menu' : 'Open menu'}
-      >
-        {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </button>
-
       {/* Overlay for mobile */}
-      {isOpen && (
+      {isMobileOpen && isMobile && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
-          onClick={closeSidebar}
+          className="fixed inset-0 z-35 bg-black/50 md:hidden"
+          onClick={closeMobile}
           aria-hidden="true"
         />
       )}
 
       {/* Sidebar */}
       <aside
+        id="main-sidebar"
+        role="navigation"
+        aria-label="Navegación principal"
         className={cn(
-          'fixed top-0 left-0 z-40 h-screen',
-          'w-64 bg-white border-r border-gray-200',
-          'transition-transform duration-300 ease-in-out',
-          'md:translate-x-0',
-          isOpen ? 'translate-x-0' : '-translate-x-full',
+          'fixed top-0 left-0 z-40 h-screen flex-shrink-0 w-64',
+          'bg-white border-r border-gray-200',
+          'transition-transform duration-300 ease-in-out xl:translate-x-0',
+          // Desktop: hide/show con translate
+          isDesktop ? (!isCollapsed ? 'w-[90px] -translate-x-full' : 'w-[290px] -translate-x-full') : undefined,
+          // Mobile: hide/show con translate
+          isMobile ? (isMobileOpen ? 'w-[290px] translate-x-0' : 'w-[90px] -translate-x-full') : undefined,
           className
         )}
       >
-        <div className="flex h-full flex-col">
+        <div className={`py-2 flex ${isCollapsed?'xl:justify-center':'justify-start'}`}>
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-gray-200 p-4">
-            <h2 className="text-lg font-bold text-gray-900">Fervor Juvenil</h2>
-            <button
-              onClick={closeSidebar}
-              className="md:hidden rounded-lg p-1 hover:bg-gray-100"
-              aria-label="Close sidebar"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          {/* User Info */}
-          {user && (
-            <div className="border-b border-gray-200 p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100">
-                  <User className="h-5 w-5 text-indigo-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">
-                    {user.firstName} {user.lastName}
-                  </p>
-                  <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
+          <div className="flex items-center justify-between h-16 px-4">
+           <img src={fervorLogo} alt="Logo Fervor Juvenil" className="w-12" />
+{isCollapsed&&         <h2 className="text-lg font-bold text-gray-900">Fervor Juvenil</h2>
+}          </div>
+        </div>
+        <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto p-4">
             <ul className="space-y-2">
@@ -105,10 +100,10 @@ export function Sidebar({ className }: SidebarProps) {
                   <li key={item.path}>
                     <NavLink
                       to={item.path}
-                      onClick={closeSidebar}
+                      onClick={isMobile ? closeMobile : undefined}
                       className={({ isActive }) =>
                         cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2',
+                          'flex items-center gap-3 px-3 py-2 rounded-lg',
                           'text-sm font-medium transition-colors',
                           isActive
                             ? 'bg-indigo-50 text-indigo-600'
@@ -116,8 +111,8 @@ export function Sidebar({ className }: SidebarProps) {
                         )
                       }
                     >
-                      <Icon className="h-5 w-5" />
-                      <span>{item.label}</span>
+                      <Icon className="h-5 w-5 flex-shrink-0" />
+                     {isCollapsed&&  isDesktop&& <span>{item.label}</span>}
                     </NavLink>
                   </li>
                 )
@@ -127,23 +122,19 @@ export function Sidebar({ className }: SidebarProps) {
 
           {/* Footer - Logout */}
           <div className="border-t border-gray-200 p-4">
-            <button
+            <Button
               onClick={logOut}
-              className={cn(
-                'flex w-full items-center gap-3 rounded-lg px-3 py-2',
-                'text-sm font-medium text-red-600',
-                'hover:bg-red-50 transition-colors'
-              )}
+              variant="ghost"
+              size="sm"
+              fullWidth
+              leftIcon={<LogOut className="h-5 w-5" />}
+              className="text-red-600 hover:bg-red-50 hover:text-red-700 justify-start"
             >
-              <LogOut className="h-5 w-5" />
-              <span>Cerrar Sesión</span>
-            </button>
+              {isCollapsed&& <span>Cerrar Sesión</span>}
+            </Button>
           </div>
         </div>
       </aside>
-
-      {/* Spacer for desktop to prevent content from going under sidebar */}
-      <div className="hidden md:block md:w-64" />
     </>
   )
 }

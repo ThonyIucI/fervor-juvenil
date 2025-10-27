@@ -30,12 +30,14 @@ const UserView = () => {
         <div className="flex items-center space-x-4">
           <UserProfileIcon
             img={{
-              alt: user.name,
+              alt: user.name ?? `${user.firstName} ${user.lastName}`,
               src: user.imageUrl ?? getRandomAvatar()
             }}
           />
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">{user.name}</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              {user.name ?? `${user.firstName} ${user.lastName}`}
+            </h2>
             <p className="text-sm text-gray-500 mt-0.5">Administrador</p>
             <p className="text-sm text-indigo-600 mt-1">{user.email}</p>
           </div>
