@@ -1,44 +1,56 @@
-import type { IData } from '@common/types/requests'
+import { BaseService } from '@common/services/base.service'
 
-import { api } from '../../../config/api'
 import type { IUpdateProfilePayload, IUserWithProfile } from '../types/Profile'
 
 /**
  * Profile Service
+ * Extends BaseService for CRUD operations on users
  * Handles all profile-related API calls
+ *
+ * Note: BaseService uses httpService which has baseURL = API_URL_V1
+ * Endpoints are relative to that base URL with versioning included
  */
-export class ProfileService {
+class ProfileServiceClass extends BaseService<IUserWithProfile> {
+  constructor() {
+    super('/users') // Resolves to: {API_URL_V1}/users
+  }
+
   /**
    * Get current user's profile
-   * GET /users/me
+   * GET {API_URL_V1}/users/me
    */
-  static getMyProfile() {
-    return api.FJ_APIv1.get<IData<IUserWithProfile>>('/users/me')
+  async getMyProfile(): Promise<IUserWithProfile> {
+    return this.customRequest<IUserWithProfile>('get', '/users/me')
   }
 
   /**
    * Update current user's profile
-   * PUT /users/me
+   * PUT {API_URL_V1}/users/me
    * @param payload - Partial profile data to update
    */
-  static updateMyProfile(payload: IUpdateProfilePayload) {
-    return api.FJ_APIv1.put<IData<IUserWithProfile>>('/users/me', payload)
+  async updateMyProfile(payload: IUpdateProfilePayload): Promise<IUserWithProfile> {
+    return this.customRequest<IUserWithProfile>('put', '/users/me', payload)
   }
 
   /**
    * Get user by UUID (admin only)
-   * GET /users/:uuid
+   * GET {API_URL_V1}/users/:uuid
    * @param uuid - User UUID
    */
-  static getUserByUuid(uuid: string) {
-    return api.FJ_APIv1.get<IData<IUserWithProfile>>(`/users/${uuid}`)
+  async getUserByUuid(uuid: string): Promise<IUserWithProfile> {
+    // Usa el método heredado getByUuid
+    return this.getByUuid(uuid)
   }
 
   /**
    * Get all users (admin only)
-   * GET /users
+   * GET {API_URL_V1}/users
    */
-  static getAllUsers() {
-    return api.FJ_APIv1.get<IData<IUserWithProfile[]>>('/users')
+  async getAllUsers(): Promise<IUserWithProfile[]> {
+    // Usa el método heredado getAll
+    return this.getAll()
   }
 }
+
+// Export singleton instance
+export const ProfileService = new ProfileServiceClass()

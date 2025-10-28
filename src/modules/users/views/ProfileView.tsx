@@ -15,8 +15,9 @@ export const CANCEL_MESSAGE = 'canceled due to new request'
 
 export default function ProfileView() {
   const GetProfile = useRequest<IUserWithProfile>(false, async () => {
-    const response = await ProfileService.getMyProfile()
-    return response.data.data
+    // ProfileService.getMyProfile() ya retorna IUserWithProfile directamente
+    // (BaseService desenvuelve response.data.data internamente)
+    return await ProfileService.getMyProfile()
   })
 
   useEffect(() => {
