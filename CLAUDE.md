@@ -9,6 +9,7 @@ Fervor Juvenil is a React + TypeScript + Vite application using TailwindCSS for 
 ## Essential Commands
 
 ### Development
+
 ```bash
 npm run dev          # Start dev server (default port 3000)
 npm run start        # Alternative: dev server on port 3000
@@ -17,6 +18,7 @@ npm run preview      # Preview production build
 ```
 
 ### Code Quality
+
 ```bash
 npm run format:all   # Format with Prettier + ESLint fix (RECOMMENDED)
 npm run format       # Format with Prettier only
@@ -27,6 +29,7 @@ npm run lint:fix     # Auto-fix linting errors
 **IMPORTANT**: Always run `npm run format:all` (not just `format` or `lint:fix` individually). This ensures correct order: Prettier first, then ESLint. See `.claude/FORMATTING_GUIDE.md` for details.
 
 ### Testing
+
 ```bash
 npm test             # Run tests in watch mode
 npm run test:run     # Run tests once
@@ -74,6 +77,7 @@ Always use path aliases for cleaner imports.
 ### Import Order (Auto-enforced)
 
 ESLint automatically sorts imports in this order:
+
 1. React and React DOM
 2. External libraries (node_modules)
 3. Internal imports with `@` aliases
@@ -81,6 +85,7 @@ ESLint automatically sorts imports in this order:
 5. CSS imports
 
 Example:
+
 ```typescript
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -109,7 +114,7 @@ import { BaseService } from '@common/services/base.service'
 
 class UserService extends BaseService<User> {
   constructor() {
-    super('/users')  // Base endpoint
+    super('/users') // Base endpoint
   }
 
   // Inherits: getAll, getById, create, update, patch, delete
@@ -122,6 +127,7 @@ class UserService extends BaseService<User> {
 ```
 
 The `HttpService` includes:
+
 - Automatic Bearer token injection from localStorage
 - Global error handling (401 → logout, 403/500 → logging)
 - Type-safe responses with `ApiResponse<T>` wrapper
@@ -140,7 +146,7 @@ export const useUserState = create<IUserState>()(
       user: null,
       setUser: (user) => set({ user })
     }),
-    { name: 'user' }  // localStorage key
+    { name: 'user' } // localStorage key
   )
 )
 ```
@@ -167,7 +173,11 @@ const loginSchema = z.object({
 type LoginInputs = z.infer<typeof loginSchema>
 
 // In component
-const { register, handleSubmit, formState: { errors } } = useForm<LoginInputs>({
+const {
+  register,
+  handleSubmit,
+  formState: { errors }
+} = useForm<LoginInputs>({
   resolver: zodResolver(loginSchema)
 })
 ```
@@ -175,6 +185,7 @@ const { register, handleSubmit, formState: { errors } } = useForm<LoginInputs>({
 ### Routing Pattern
 
 Routes are protected via `PrivateRoute` wrapper that:
+
 1. Checks if user exists in `useUserState`
 2. Redirects to login if not authenticated
 3. Wraps authenticated pages in `MainLayout`
@@ -196,6 +207,7 @@ export const AUTH_ROUTES = {
 The project has a consistent design system with pre-built components in `@common/components/`:
 
 **Button**: 5 variants (primary, secondary, outline, ghost, danger) × 3 sizes (sm, md, lg)
+
 ```typescript
 <Button variant="primary" size="md" isLoading={loading} leftIcon={<Icon />}>
   Submit
@@ -203,6 +215,7 @@ The project has a consistent design system with pre-built components in `@common
 ```
 
 **Input**: Supports labels, errors, icons, and integrates with react-hook-form
+
 ```typescript
 <Input
   label="Email"
@@ -213,6 +226,7 @@ The project has a consistent design system with pre-built components in `@common
 ```
 
 **Card**: 3 variants (default, outlined, elevated)
+
 ```typescript
 <Card variant="elevated">Content</Card>
 ```
@@ -234,10 +248,12 @@ import { cn } from '@common/utils/cn'
 ## Testing Patterns
 
 ### Test File Location
+
 - Unit tests: `src/tests/unit/[category]/[name].test.tsx`
 - Use `@tests/utils/test-utils` for rendering (includes providers like BrowserRouter)
 
 ### Example Test
+
 ```typescript
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@tests/utils/test-utils'
@@ -256,24 +272,29 @@ describe('Button Component', () => {
 ## TypeScript Conventions
 
 ### Type Imports
+
 Use `import type` for type-only imports (required by `verbatimModuleSyntax`):
 
 ```typescript
 import type { ReactNode, ButtonHTMLAttributes } from 'react'
 import type { AxiosResponse } from 'axios'
-import { useState } from 'react'  // Value import
+import { useState } from 'react' // Value import
 ```
 
 ### Avoid `any`
+
 Never use `any`. Use `unknown` for truly unknown types, then narrow with type guards.
 
 ### Interface Naming
+
 Interfaces can optionally use `I` prefix (e.g., `IUser`, `IUserState`) but it's not enforced. Be consistent within a module.
 
 ### NO Barrel Exports
+
 **IMPORTANT**: Do NOT create barrel export files (index.ts/index.tsx that re-export from other files). This is considered a bad practice.
 
 Instead of:
+
 ```typescript
 // ❌ Bad: src/@common/components/Toast/index.ts
 export { Toast } from './Toast'
@@ -281,6 +302,7 @@ export { ToastContainer } from './ToastContainer'
 ```
 
 Use direct imports:
+
 ```typescript
 // ✅ Good: Import directly from source files
 import { Toast } from '@common/components/Toast/Toast'
@@ -290,15 +312,18 @@ import { ToastContainer } from '@common/components/Toast/ToastContainer'
 **Why?**: Barrel exports hurt tree-shaking, create circular dependency risks, make debugging harder, and increase bundle size.
 
 ### Always Use Route Constants
+
 **IMPORTANT**: Never hardcode route strings in components or hooks. Always define them as constants.
 
 Instead of:
+
 ```typescript
 // ❌ Bad: Hardcoded route string
 navigate('/profile')
 ```
 
 Use route constants:
+
 ```typescript
 // ✅ Good: Use constants defined in routes/index.ts
 import { USERS_ROUTES } from '@modules/users/routes'
@@ -306,6 +331,7 @@ navigate(USERS_ROUTES.PROFILE)
 ```
 
 **Why?**:
+
 - Single source of truth for all routes
 - Easy refactoring (change in one place)
 - Autocomplete and type safety
@@ -322,6 +348,7 @@ navigate(USERS_ROUTES.PROFILE)
 - **useMediaQueryScreen**: Responsive breakpoint detection
 
 Example:
+
 ```typescript
 import { useDebounce } from '@common/hooks'
 
@@ -350,14 +377,17 @@ useEffect(() => {
 ## Known Issues & Gotchas
 
 ### Formatting Conflicts
+
 **Problem**: Prettier and ESLint used to conflict on import ordering, causing infinite error loops.
 
 **Solution**: Prettier now handles only formatting (spaces, quotes), ESLint handles import ordering. Always run `npm run format:all` which does both in the correct order. See `.claude/FORMATTING_GUIDE.md`.
 
 ### TypeScript Strict Mode
+
 `verbatimModuleSyntax` is enabled, requiring `import type` for types. This prevents runtime imports of type-only dependencies.
 
 ### MainLayout Structure
+
 The `MainLayout` uses `flex h-screen overflow-hidden` with a fixed header. The main content area has `flex-1 overflow-auto` to enable scrolling while keeping the header fixed.
 
 ## Environment & Configuration
@@ -388,6 +418,7 @@ This project follows a **Test-Driven Development (TDD)** methodology with specia
 ### Quick Start for New Features
 
 To implement a user story:
+
 ```
 Implementa FJ-[número]: [nombre-breve]
 PR: feature/FJ-[número]-descripcion-breve
@@ -396,6 +427,7 @@ PR: feature/FJ-[número]-descripcion-breve
 ### TDD Cycle
 
 Every feature follows this cycle:
+
 1. **🔴 RED**: Write failing tests first
 2. **🟢 GREEN**: Implement code to pass tests
 3. **🔵 REFACTOR**: Improve code quality
@@ -405,6 +437,7 @@ See [WORKFLOW.md](./.claude/WORKFLOW.md) for complete development workflow.
 ### Specialized Agents
 
 The project uses specialized agents for different tasks:
+
 - **frontend-senior** (Sonnet): Complex architecture, performance, tech leadership
 - **frontend-mid** (Haiku): Standard features, CRUD, forms
 - **qa-tester** (Haiku): Test strategy, E2E tests, coverage analysis
@@ -418,6 +451,7 @@ All user stories are tracked in [requirements.md](./requirements.md) with detail
 ### Commit Conventions
 
 Follow Conventional Commits with TDD-specific types:
+
 ```bash
 test(feature): add failing tests for [feature]    # RED phase
 feat(feature): implement [feature] to pass tests  # GREEN phase

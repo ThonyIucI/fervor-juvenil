@@ -64,7 +64,8 @@ export class HttpService {
       async (error: AxiosError<ApiErrorResponse>) => {
         if (error.response?.status === 401) {
           // Handle unauthorized - clear all auth data and redirect to login
-          localStorage.removeItem('token')
+          // Clear token and user from localStorage (Zustand persist keys)
+          localStorage.removeItem('accessToken')
           localStorage.removeItem('user')
 
           // Redirigir solo si no estamos ya en login
