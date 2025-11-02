@@ -78,7 +78,6 @@ export function Sidebar({ className }: SidebarProps) {
           !isDesktop ? (isOpen ? 'translate-x-0' : '-translate-x-full') : '',
           className
         )}
-        style={{ height: 'calc(100vh) - 64px' }}
       >
         {/* Header */}
         <div

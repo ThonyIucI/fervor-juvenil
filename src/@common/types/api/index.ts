@@ -19,12 +19,12 @@ export interface PaginatedResponse<T = unknown> {
 }
 
 /**
- * Pagination metadata
+ * Pagination metadata (matches backend contract)
  */
 export interface PaginationMeta {
-  page: number
-  limit: number
-  total: number
+  currentPage: number
+  itemsPerPage: number
+  totalItems: number
   totalPages: number
   hasNextPage: boolean
   hasPreviousPage: boolean
