@@ -28,7 +28,7 @@ const navItems: NavItem[] = [
 export function Sidebar({ className }: SidebarProps) {
   const { logOut } = useLogin()
   const { isOpen, close } = useSidebarState()
-  const { status: isDesktop } = useMediaQueryScreen('(min-width: 1280px)')
+  const isDesktop = useMediaQueryScreen('(min-width: 1280px)')
 
   // Manejar comportamiento mobile: Escape + prevenir scroll
   useEffect(() => {

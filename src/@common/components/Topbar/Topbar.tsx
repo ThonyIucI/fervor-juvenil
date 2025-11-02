@@ -11,7 +11,7 @@ export function Topbar() {
   const { user } = useUserState()
   const [isDarkMode, setIsDarkMode] = useState(false)
   const { isOpen, toggle } = useSidebarState()
-  const { status: isDesktop } = useMediaQueryScreen('(min-width: 1280px)')
+  const isDesktop = useMediaQueryScreen('(min-width: 1280px)')
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode)

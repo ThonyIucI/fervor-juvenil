@@ -14,5 +14,5 @@ export const useMediaQueryScreen = (query = '(min-width: 576px)') => {
 
   const status = Boolean(mQuery && mQuery.matches)
 
-  return { status }
+  return status
 }
