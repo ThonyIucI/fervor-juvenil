@@ -1,6 +1,19 @@
 import { BaseService } from '@common/services/base.service'
+import type { PaginatedResponse } from '@common/types/api'
 
 import type { IUpdateProfilePayload, IUserWithProfile } from '../types/Profile'
+
+/**
+ * Query parameters for paginated user list
+ */
+export interface GetUsersQueryParams {
+  page?: number
+  limit?: number
+  sortBy?: 'firstName' | 'lastName' | 'email' | 'createdAt' | 'isActive'
+  sortOrder?: 'ASC' | 'DESC'
+  isActive?: boolean
+  search?: string
+}
 
 /**
  * Profile Service
@@ -49,6 +62,30 @@ class ProfileServiceClass extends BaseService<IUserWithProfile> {
   async getAllUsers(): Promise<IUserWithProfile[]> {
     // Usa el método heredado getAll
     return this.getAll()
+  }
+
+  /**
+   * Get paginated users with filters and search (admin only)
+   * GET {API_URL_V1}/users?page=1&limit=10&search=...
+   * @param params - Query parameters for pagination, filtering, and search
+   * @returns Paginated response with { data: IUserWithProfile[], meta: PaginationMeta }
+   */
+  async getAllUsersPaginated(
+    params: GetUsersQueryParams = {}
+  ): Promise<PaginatedResponse<IUserWithProfile>> {
+    // Convert params to plain object for axios
+    const queryParams: Record<string, string | number | boolean> = {}
+
+    if (params.page) queryParams.page = params.page
+    if (params.limit) queryParams.limit = params.limit
+    if (params.sortBy) queryParams.sortBy = params.sortBy
+    if (params.sortOrder) queryParams.sortOrder = params.sortOrder
+    if (params.isActive !== undefined) queryParams.isActive = params.isActive
+    if (params.search) queryParams.search = params.search
+
+    // Use inherited getPaginated method from BaseService
+    // This returns { data: T[], meta: PaginationMeta } directly
+    return this.getPaginated(queryParams)
   }
 }
 
