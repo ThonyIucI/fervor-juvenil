@@ -14,6 +14,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   inputSize?: InputSize
   register?: UseFormRegisterReturn
   fullWidth?: boolean
+  inputClassName?: string
 }
 
 const inputSizes: Record<InputSize, string> = {
@@ -52,6 +53,7 @@ export function Input({
   inputSize = 'md',
   register,
   className,
+  inputClassName = '',
   fullWidth = true,
   disabled,
   id,
@@ -60,7 +62,7 @@ export function Input({
   const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined)
 
   return (
-    <div className={cn('flex flex-col gap-1', fullWidth ? 'w-full' : '')}>
+    <div className={cn('flex flex-col gap-1', fullWidth ? 'w-full' : '', className)}>
       {label && (
         <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">
           {label}
@@ -91,7 +93,7 @@ export function Input({
             error
               ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
               : 'border-gray-200 focus:border-indigo-500 focus:ring-indigo-100',
-            className
+            inputClassName
           )}
         />
 
