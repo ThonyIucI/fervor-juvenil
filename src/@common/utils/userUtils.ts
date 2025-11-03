@@ -41,10 +41,10 @@ export function getUserFullNameLastFirst(user: IUser | IUserWithProfile): string
   const lastName = userWithProfile.profile?.lastNames || user.lastName || ''
 
   if (!firstName && !lastName) return '-'
-  if (!lastName) return firstName
-  if (!firstName) return lastName
+  if (!lastName) return firstName.toLowerCase()
+  if (!firstName) return lastName.toLowerCase()
 
-  return `${lastName}, ${firstName}`
+  return `${lastName}, ${firstName}`.toLocaleLowerCase()
 }
 
 /**

@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { AlertCircle, ChevronsUpDown, Search, Users as UsersIcon } from 'lucide-react'
 
 import { EmptyState } from '@/@common/components/EmptyState'
+import { Input } from '@/@common/components/Input'
+import { ChangePaginationItems, Pagination, PaginationInfo } from '@/@common/components/Pagination'
+import { SortButton } from '@/@common/components/SortButton'
+import { SortModal } from '@/@common/components/SortModal'
 import { useBoolean, useDebounce, useMediaQueryScreen } from '@/@common/hooks'
 import { usePagination } from '@/@common/hooks/usePagination'
 import { useRequest } from '@/@common/hooks/useRequest'
@@ -14,7 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow
-} from '@common/components/Table/Table'
+} from '@common/components/Table'
 import type { PaginatedResponse } from '@common/types/api'
 import {
   getUserFullNameLastFirst,
@@ -23,11 +27,9 @@ import {
 } from '@common/utils/userUtils'
 
 import { UserCard } from '../Components/UserCard/UserCard'
-import { UserCardSkeleton } from '../Components/UserCardSkeleton/UserCardSkeleton'
-import { UserDetailsContent } from '../Components/UserDetailsContent/UserDetailsContent'
-import { UserDetailsModal } from '../Components/UserDetailsModal/UserDetailsModal'
-import { UsersPagination } from '../Components/UsersPagination/UsersPagination'
-import { UsersTableToolbar } from '../Components/UsersTableToolbar/UsersTableToolbar'
+import { UserCardSkeleton } from '../Components/UserCardSkeleton'
+import { UserDetailsContent } from '../Components/UserDetailsContent'
+import { UserDetailsModal } from '../Components/UserDetailsModal'
 import type { GetUsersQueryParams } from '../services/profile.service'
 import { ProfileService } from '../services/profile.service'
 import type { IUserWithProfile } from '../types/Profile'
@@ -42,6 +44,7 @@ export default function UsersView() {
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('ASC')
   const [selectedUser, setSelectedUser] = useState<IUserWithProfile | null>(null)
   const isModalOpen = useBoolean()
+  const isSortModalOpen = useBoolean()
   const isMobile = useMediaQueryScreen('(max-width: 767px)')
   const debouncedSearch = useDebounce(search, 500)
 
@@ -115,38 +118,80 @@ export default function UsersView() {
   const isEmpty = !hasUsers && !search && !GetUsers.loading && !hasError
   const isSearchEmpty = !hasUsers && search && !GetUsers.loading && !hasError
 
+
+  const renderErrorState = () => {
+    return (
+      <Card className='mt-2'>
+        <EmptyState
+          icon={<AlertCircle className="h-6 w-6" />}
+          title="Error al cargar usuarios"
+          description="No se pudo cargar la lista de usuarios. Por favor, intenta nuevamente."
+          variant="error"
+          action={{
+            label: 'Reintentar',
+            onClick: GetUsers.handler,
+            isLoading: GetUsers.loading
+          }}
+        />
+      </Card>
+    )
+  }
+  const renderEmptyState = () => isSearchEmpty ? (
+    <EmptyState
+      icon={<Search className="h-8 w-8" />}
+      title="No se encontraron resultados"
+      description={`No hay usuarios que coincidan con "${search}". Intenta con otro término de búsqueda.`}
+      variant="neutral"
+    />
+  ) : (
+    <EmptyState
+      icon={<UsersIcon className="h-8 w-8" />}
+      title="No hay usuarios registrados"
+      description="Aún no hay usuarios en el sistema. Los usuarios aparecerán aquí una vez que se registren."
+    />
+  )
   return (
-    <div>
+    <>
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Lista de Usuarios</h1>
         <p className="text-gray-600 mt-0">Gestiona los usuarios del sistema</p>
       </div>
-      <Card variant="elevated" className="overflow-hidden">
-        {/* Toolbar - Always visible and persistent */}
-        <UsersTableToolbar
-          search={search}
-          onSearchChange={setSearch}
-          itemsPerPage={limit}
-          onItemsPerPageChange={setLimitPage}
-          totalItems={meta?.totalItems || 0}
-          disabled={GetUsers.loading || hasError}
-        />
+      <div className="overflow-hidden md:p-4 md:bg-white rounded-2xl">
+        <div className='flex justify-between bg-white px-4 md:px-0 rounded-2xl py-4 md:py-2 md:pb-4'>
+          {meta && !isEmpty && !isSearchEmpty && !hasError && (
+            <div className="hidden md:flex">
+              <ChangePaginationItems
+                meta={meta}
+                itemsPerPage={limit}
+                onItemsPerPageChange={setLimitPage}
+                isMobile={isMobile}
+                disabled={GetUsers.loading || hasError}
 
-        {/* Mobile Pagination - Top */}
-        {meta && !isEmpty && !isSearchEmpty && !hasError && (
-          <div className="md:hidden p-2 md:p-4 border-b border-gray-200">
-            <UsersPagination
-              meta={meta}
-              onPreviousPage={prevPage}
-              onNextPage={nextPage}
-              isLoading={GetUsers.loading}
-              isMobile={isMobile}
+              />
+            </div>
+          )}
+          <div className="flex-1 md:max-w-md flex gap-2">
+            <Input
+              type="search"
+              placeholder="Buscar por nombre, apellido o email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              leftIcon={<Search className="h-4 w-4" />}
+              disabled={GetUsers.loading || hasError}
+              fullWidth={isMobile}
+              className='flex-1'
             />
+            {isMobile && (
+              <SortButton
+                onClick={isSortModalOpen.open}
+                disabled={GetUsers.loading || hasError}
+                active={sortBy !== 'lastName' || sortOrder !== 'ASC'}
+              />
+            )}
           </div>
-        )}
-
+        </div>
         {/* Desktop Table - Headers always visible */}
-        <div className="hidden md:block min-h-[600px]">
+        <div className="bg-white hidden md:block min-h-[600px]">
           <Table>
             <TableHeader>
               <TableRow>
@@ -176,36 +221,9 @@ export default function UsersView() {
               skeletonRows={limit}
               columnCount={tableColumns.length}
               showErrorState={hasError}
-              errorState={
-                <EmptyState
-                  icon={<AlertCircle className="h-8 w-8" />}
-                  title="Error al cargar usuarios"
-                  description="No se pudo cargar la lista de usuarios. Por favor, intenta nuevamente."
-                  variant="error"
-                  action={{
-                    label: 'Reintentar',
-                    onClick: GetUsers.handler,
-                    isLoading: GetUsers.loading
-                  }}
-                />
-              }
+              errorState={renderErrorState()}
               showEmptyState={Boolean(isEmpty || isSearchEmpty)}
-              emptyState={
-                isSearchEmpty ? (
-                  <EmptyState
-                    icon={<Search className="h-8 w-8" />}
-                    title="No se encontraron resultados"
-                    description={`No hay usuarios que coincidan con "${search}". Intenta con otro término de búsqueda.`}
-                    variant="neutral"
-                  />
-                ) : (
-                  <EmptyState
-                    icon={<UsersIcon className="h-8 w-8" />}
-                    title="No hay usuarios registrados"
-                    description="Aún no hay usuarios en el sistema. Los usuarios aparecerán aquí una vez que se registren."
-                  />
-                )
-              }
+              emptyState={renderEmptyState()}
             >
               {users.map((user) => (
                 <TableRow
@@ -265,31 +283,43 @@ export default function UsersView() {
           </Table>
         </div>
 
+        {/* Mobile Cards */}
+        {isMobile && <PaginationInfo meta={meta} className='mt-3 ml-3' />}
+        {!(hasError || isSearchEmpty) && <div className="md:hidden pt-4 space-y-4 min-h-[600px]">
+          {GetUsers.loading
+            ? Array.from({ length: limit }).map((_, i) => <UserCardSkeleton key={i} />)
+            : users.map((user) => (
+              <UserCard
+                key={user.uuid}
+                user={user}
+                onEdit={handleEditUser}
+                onViewDashboard={handleViewDashboard}
+                onCardClick={handleViewProfile}
+              />
+            ))}
+        </div>}
+
+        {/* Error state in pagination area */}
+        {hasError && renderErrorState()}
+
+        {/* Empty search state in pagination area */}
+        {isSearchEmpty && renderEmptyState()}
         {/* Desktop Pagination - Bottom */}
         {meta && hasUsers && (
-          <UsersPagination
+          <Pagination
             meta={meta}
             onPreviousPage={prevPage}
             onNextPage={nextPage}
             isLoading={GetUsers.loading}
+            isMobile={isMobile}
+            disabled={GetUsers.loading || hasError}
+            itemsPerPage={limit}
+            onItemsPerPageChange={setLimitPage}
+            className={isMobile ? 'bg-white mt-4 border-0 rounded-2xl' : ''}
           />
         )}
-      </Card>
-
-      {/* Mobile Cards */}
-      <div className="md:hidden pt-4 space-y-4 min-h-[600px]">
-        {GetUsers.loading
-          ? Array.from({ length: limit }).map((_, i) => <UserCardSkeleton key={i} />)
-          : users.map((user) => (
-            <UserCard
-              key={user.uuid}
-              user={user}
-              onEdit={handleEditUser}
-              onViewDashboard={handleViewDashboard}
-              onCardClick={handleViewProfile}
-            />
-          ))}
       </div>
+
 
       {/* User Details Modal */}
       <UserDetailsModal isOpen={isModalOpen.active} onClose={handleCloseModal}>
@@ -301,6 +331,24 @@ export default function UsersView() {
           />
         )}
       </UserDetailsModal>
-    </div>
+
+      {/* Sort Modal (Mobile) */}
+      <SortModal
+        isOpen={isSortModalOpen.active}
+        onClose={isSortModalOpen.close}
+        title="Ordenar por"
+        options={[
+          { key: 'lastName', label: 'Nombre' },
+          { key: 'email', label: 'Email' },
+          { key: 'isActive', label: 'Estado' }
+        ]}
+        currentSort={sortBy || 'lastName'}
+        currentOrder={sortOrder}
+        onSortChange={(key, order) => {
+          setSortBy(key as GetUsersQueryParams['sortBy'])
+          setSortOrder(order)
+        }}
+      />
+    </>
   )
 }
