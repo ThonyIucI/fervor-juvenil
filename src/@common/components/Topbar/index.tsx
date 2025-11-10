@@ -42,7 +42,8 @@ export function Topbar() {
           >
             {!isDesktop && isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
-          <div className="relative">
+          {/* TODO: Include general search to find modules  */}
+          {/*   <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
@@ -53,8 +54,8 @@ export function Topbar() {
                 'focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500',
                 'transition-colors'
               )}
-            />
-          </div>
+            /> 
+          </div>*/}
         </div>
 
         {/* Right Section - Actions */}

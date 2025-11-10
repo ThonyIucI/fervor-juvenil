@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { LogOut, User, Users } from 'lucide-react'
 
+import { USERS_ROUTES } from '@/modules/users/routes'
 import { useSidebarState } from '@/state/useSidebarState'
 import { Button } from '@common/components/Button'
 import { useMediaQueryScreen } from '@common/hooks/useMediaQueryScreen'
@@ -21,14 +22,23 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Mi Perfil', path: '/profile', icon: User },
-  { label: 'Usuarios', path: '/users', icon: Users }
+  { label: 'Mi Perfil', path: USERS_ROUTES.PROFILE, icon: User },
+  { label: 'Usuarios', path: USERS_ROUTES.USERS_LIST, icon: Users }
 ]
 
 export function Sidebar({ className }: SidebarProps) {
   const { logOut } = useLogin()
-  const { isOpen, close } = useSidebarState()
+  const { close, isOpen, open } = useSidebarState()
   const isDesktop = useMediaQueryScreen('(min-width: 1280px)')
+
+  // Sincronizar estado del sidebar cuando cambia el breakpoint
+  useEffect(() => {
+    if (isDesktop) {
+      open() // En desktop, siempre abierto
+    } else {
+      close() // En mobile, cerrado por defecto
+    }
+  }, [isDesktop, open, close])
 
   // Manejar comportamiento mobile: Escape + prevenir scroll
   useEffect(() => {
@@ -49,7 +59,7 @@ export function Sidebar({ className }: SidebarProps) {
   // Desktop: isOpen = true → expandido (290px), isOpen = false → colapsado (90px)
   // Mobile: isOpen = true → modal (290px), isOpen = false → oculto
   const sidebarWidth = isOpen ? 'w-[290px]' : 'w-[90px]'
-  const showLabels = isOpen
+  // const showLabels = isOpen
 
   return (
     <>
@@ -83,11 +93,11 @@ export function Sidebar({ className }: SidebarProps) {
         <div
           className={cn(
             'flex items-center h-18 px-4 transition-all',
-            showLabels ? 'justify-start gap-3' : 'justify-center'
+            isOpen ? 'justify-start gap-3' : 'justify-center'
           )}
         >
           <img src={fervorLogo} alt="Logo Fervor Juvenil" className="w-12 flex-shrink-0" />
-          {showLabels && <h2 className="text-lg font-bold text-gray-900">Fervor Juvenil</h2>}
+          {isOpen && <h2 className="text-lg font-bold text-gray-900">Fervor Juvenil</h2>}
         </div>
 
         {/* Navigation - flex-1 permite que ocupe el espacio disponible */}
@@ -104,7 +114,7 @@ export function Sidebar({ className }: SidebarProps) {
                       cn(
                         'flex items-center gap-3 px-3 py-2 rounded-lg',
                         'text-sm font-medium transition-colors',
-                        showLabels ? 'justify-start' : 'justify-center',
+                        isOpen ? 'justify-start' : 'justify-center',
                         isActive
                           ? 'bg-indigo-50 text-indigo-600'
                           : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
@@ -112,7 +122,7 @@ export function Sidebar({ className }: SidebarProps) {
                     }
                   >
                     <Icon className="h-5 w-5 flex-shrink-0" />
-                    {showLabels && <span>{item.label}</span>}
+                    {isOpen && <span>{item.label}</span>}
                   </NavLink>
                 </li>
               )
@@ -130,10 +140,10 @@ export function Sidebar({ className }: SidebarProps) {
             leftIcon={<LogOut className="h-5 w-5" />}
             className={cn(
               'text-red-600 hover:bg-red-50 hover:text-red-700',
-              showLabels ? 'justify-start' : 'justify-center px-0'
+              isOpen ? 'justify-start' : 'justify-center px-0'
             )}
           >
-            {showLabels && <span>Cerrar Sesión</span>}
+            {isOpen && <span>Cerrar Sesión</span>}
           </Button>
         </div>
       </aside>

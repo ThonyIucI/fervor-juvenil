@@ -92,9 +92,6 @@ export const Pagination = ({
         return <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">{emptyState}</div>
     }
 
-    // Don't show pagination if only 1 page
-    if (meta?.totalPages && meta?.totalPages <= 1) return null
-
     // Mobile version
     if (isMobile) {
         return (
