@@ -44,7 +44,7 @@ export default function ProfileView() {
   }
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Mi Perfil</h1>
 
       {/* Header with basic info */}
@@ -56,7 +56,7 @@ export default function ProfileView() {
           <h3 className="text-lg font-medium text-gray-900 mb-2">Perfil Incompleto</h3>
           <p className="text-gray-500">Completa tu perfil para que podamos conocerte mejor</p>
         </div> :
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Personal Information */}
           <ProfileSection title="Datos Personales" icon={<User className="h-5 w-5" />}>
             <dl className="grid grid-cols-2 gap-4">
@@ -163,7 +163,6 @@ export default function ProfileView() {
             </dl>
           </ProfileSection>
         </div>}
-
     </div>
   )
 }

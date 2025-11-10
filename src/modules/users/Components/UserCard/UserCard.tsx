@@ -1,4 +1,4 @@
-import { Edit, LayoutDashboard, Mail, MoreVertical, Phone } from 'lucide-react'
+import { EditIcon, IdCardIcon, LayoutDashboardIcon, MailIcon, MoreVerticalIcon, PhoneIcon } from 'lucide-react'
 
 import type { DropdownItem } from '@/@common/components/Dropdown'
 import { Dropdown } from '@/@common/components/Dropdown'
@@ -24,7 +24,7 @@ export function UserCard({ user, onEdit, onViewDashboard, onCardClick, className
   if (onEdit) {
     dropdownItems.push({
       label: 'Editar',
-      icon: <Edit className="h-4 w-4" />,
+      icon: <EditIcon className="h-4 w-4" />,
       onClick: () => onEdit(user)
     })
   }
@@ -32,7 +32,7 @@ export function UserCard({ user, onEdit, onViewDashboard, onCardClick, className
   if (onViewDashboard) {
     dropdownItems.push({
       label: 'Ver Dashboard',
-      icon: <LayoutDashboard className="h-4 w-4" />,
+      icon: <LayoutDashboardIcon className="h-4 w-4" />,
       onClick: () => onViewDashboard(user)
     })
   }
@@ -57,8 +57,11 @@ export function UserCard({ user, onEdit, onViewDashboard, onCardClick, className
           {/* Name and status */}
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-gray-900 truncate capitalize">{getUserFullNameLastFirst(user)}</h3>
-            <div className="mt-1">
-              {user.isActive ? (
+            <div className='flex items-center justify-between gap-2'>
+              <span className="inline-flex gap-0.5 items-center py-0.5 rounded-full text-xs font-normal ">
+                <IdCardIcon className=" text-gray-600" />  {user.dni ?? '-'}
+              </span>
+              {user.profile?.status === 'A' ? (
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                   Activo
                 </span>
@@ -81,7 +84,7 @@ export function UserCard({ user, onEdit, onViewDashboard, onCardClick, className
                     className="h-8 w-8 p-0"
                     aria-label="Opciones"
                   >
-                    <MoreVertical className="h-5 w-5 text-gray-500" />
+                    <MoreVerticalIcon className="h-5 w-5 text-gray-500" />
                   </Button>
                 }
                 items={dropdownItems}
@@ -95,13 +98,13 @@ export function UserCard({ user, onEdit, onViewDashboard, onCardClick, className
         <div className="space-y-2 text-sm">
           {/* Email */}
           <div className="flex items-center gap-2 text-gray-600">
-            <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
+            <MailIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
             <span className="truncate">{user.email || '-'}</span>
           </div>
 
-          {/* Phone (placeholder) */}
+          {/* PhoneIcon (placeholder) */}
           <div className="flex items-center gap-2 text-gray-600">
-            <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
+            <PhoneIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
             <span>-</span>
           </div>
 

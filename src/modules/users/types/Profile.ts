@@ -62,6 +62,7 @@ export interface IUserWithProfile {
   lastName: string
   email: string
   slug: string
+  dni: string
   isActive?: boolean
   isGoogleAccount: boolean
   createdAt: string

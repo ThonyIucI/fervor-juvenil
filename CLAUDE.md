@@ -237,6 +237,46 @@ The project has a consistent design system with pre-built components in `@common
 />
 ```
 
+**IconButton**: Icon-only button with Material UI design patterns
+
+Optimized for displaying icons with support for multiple sizes, colors, and variants.
+
+```typescript
+import { IconButton } from '@common/components/IconButton'
+import { Edit, Trash, Download } from 'lucide-react'
+
+// Ghost variant (default) - subtle hover effect
+<IconButton size="md" color="default" variant="ghost">
+  <Edit />
+</IconButton>
+
+// Outlined variant - with border
+<IconButton size="md" color="primary" variant="outlined">
+  <Edit />
+</IconButton>
+
+// Filled variant - solid background
+<IconButton size="sm" color="danger" variant="filled">
+  <Trash />
+</IconButton>
+
+// Success action
+<IconButton size="lg" color="success" variant="outlined">
+  <Download />
+</IconButton>
+```
+
+**Props:**
+- `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
+- `color`: `'default'` | `'primary'` | `'secondary'` | `'danger'` | `'success'` | `'warning'` (default: `'default'`)
+- `variant`: `'filled'` | `'outlined'` | `'ghost'` (default: `'ghost'`)
+- All standard button HTML attributes (onClick, disabled, aria-label, etc.)
+
+**Sizes:**
+- `sm`: 32px × 32px (icon: 16px)
+- `md`: 36px × 36px (icon: 20px)
+- `lg`: 40px × 40px (icon: 24px)
+
 **Input**: Supports labels, errors, icons, and integrates with react-hook-form
 
 ```typescript
@@ -441,6 +481,64 @@ import { SortButton } from '@common/components/SortButton'
 
 **Features**: Slides from bottom, max 90vh, smooth transitions, auto-closes on selection.
 
+**Modal**: Generic modal component with multiple positions and smooth transitions
+
+Highly customizable modal with support for different positions (center, right, left, bottom), sizes, and mobile-friendly behavior.
+
+```typescript
+import { Modal } from '@common/components/Modal'
+
+// Side modal (right or left)
+<Modal
+  isOpen={isOpen}
+  onClose={handleClose}
+  title="User Details"
+  position="right"
+  showCloseButton={true}
+  closeOnOverlayClick={true}
+  closeOnEscape={true}
+>
+  <YourContent />
+</Modal>
+
+// Center modal with size
+<Modal
+  isOpen={isOpen}
+  onClose={handleClose}
+  title="Confirm Action"
+  position="center"
+  size="md"
+  showCloseButton={true}
+>
+  <YourContent />
+</Modal>
+
+// Bottom sheet (mobile-friendly)
+<Modal
+  isOpen={isOpen}
+  onClose={handleClose}
+  position="bottom"
+  showCloseButton={false}
+>
+  <YourContent />
+</Modal>
+```
+
+**Props:**
+- `position`: `'center'` | `'right'` | `'left'` | `'bottom'` (default: `'center'`)
+- `size`: `'sm'` | `'md'` | `'lg'` | `'xl'` | `'full'` (only for center position, default: `'md'`)
+- `showCloseButton`: Boolean (default: `true`)
+- `closeOnOverlayClick`: Boolean (default: `true`)
+- `closeOnEscape`: Boolean (default: `true`)
+
+**Behavior:**
+- **Right/Left modals**: Full height, 100% width on mobile, 500px-600px on desktop
+- **Center modals**: Responsive sizing with scale animation
+- **Bottom modals**: Max 90vh height, slides from bottom (mobile-friendly)
+- **Smooth transitions**: 300ms duration with ease-out timing and delayed mounting/unmounting for smooth entry/exit animations
+- **Body scroll prevention**: Automatically manages body overflow
+- **Keyboard support**: ESC key closes modal (can be disabled)
+
 ### Styling with Tailwind
 
 Use the `cn()` utility for conditional classes:
@@ -480,6 +578,23 @@ className={cn(
 ```
 
 **Why?**: This ensures `cn()` only receives strings, preventing unexpected behavior from falsy values like `false`, `null`, or `undefined`.
+
+### Global Scrollbar Styles
+
+The project includes custom scrollbar styles that provide a more user-friendly experience:
+
+**Features**:
+- **Thin scrollbar**: 8px width (down from default ~15px)
+- **Appears on hover**: Scrollbar is transparent by default, only visible when hovering over scrollable content
+- **Smooth transitions**: Color changes animate smoothly
+- **Cross-browser support**: Works in both Webkit (Chrome, Safari, Edge) and Firefox
+
+**Colors**:
+- Default (on hover): `rgba(156, 163, 175, 0.5)` - gray-400 at 50% opacity
+- Hover state: `rgba(107, 114, 128, 0.7)` - gray-500 at 70% opacity
+- Active state: `rgba(75, 85, 99, 0.9)` - gray-600 at 90% opacity
+
+These styles are defined globally in `src/index.css` and apply to all scrollable elements automatically.
 
 ## Testing Patterns
 

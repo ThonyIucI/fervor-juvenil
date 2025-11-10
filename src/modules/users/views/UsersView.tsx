@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, ChevronsUpDown, Search, Users as UsersIcon } from 'lucide-react'
+import { AlertCircleIcon, ChevronsUpDownIcon, EditIcon, LayoutDashboardIcon, SearchIcon, UsersIcon } from 'lucide-react'
 
 import { EmptyState } from '@/@common/components/EmptyState'
+import { IconButton } from '@/@common/components/IconButton'
 import { Input } from '@/@common/components/Input'
 import { ChangePaginationItems, Pagination, PaginationInfo } from '@/@common/components/Pagination'
 import { SortButton } from '@/@common/components/SortButton'
@@ -23,7 +24,6 @@ import type { PaginatedResponse } from '@common/types/api'
 import {
   getUserFullNameLastFirst,
   getUserInitials,
-  getUserSeniority
 } from '@common/utils/userUtils'
 
 import { UserCard } from '../Components/UserCard/UserCard'
@@ -108,9 +108,10 @@ export default function UsersView() {
     { key: 'name', label: 'Nombre', sortKey: 'lastName' as const },
     { key: 'email', label: 'Email', sortKey: 'email' as const },
     { key: 'status', label: 'Estado', sortKey: 'isActive' as const },
-    { key: 'seniority', label: 'Antigüedad', sortKey: null },
+    { key: 'dni', label: 'DNI', sortKey: 'dni' as const },
     { key: 'actions', label: 'Acciones', sortKey: null, align: 'right' as const }
   ]
+  // crear usuarios con dni si tienen correo repetido
 
   // Determine table states
   const hasUsers = users.length > 0
@@ -123,7 +124,7 @@ export default function UsersView() {
     return (
       <Card className='mt-2'>
         <EmptyState
-          icon={<AlertCircle className="h-6 w-6" />}
+          icon={<AlertCircleIcon className="h-6 w-6" />}
           title="Error al cargar usuarios"
           description="No se pudo cargar la lista de usuarios. Por favor, intenta nuevamente."
           variant="error"
@@ -138,7 +139,7 @@ export default function UsersView() {
   }
   const renderEmptyState = () => isSearchEmpty ? (
     <EmptyState
-      icon={<Search className="h-8 w-8" />}
+      icon={<SearchIcon className="h-8 w-8" />}
       title="No se encontraron resultados"
       description={`No hay usuarios que coincidan con "${search}". Intenta con otro término de búsqueda.`}
       variant="neutral"
@@ -158,25 +159,22 @@ export default function UsersView() {
       </div>
       <div className="overflow-hidden md:p-4 md:bg-white rounded-2xl">
         <div className='flex justify-between bg-white px-4 md:px-0 rounded-2xl py-4 md:py-2 md:pb-4'>
-          {meta && !isEmpty && !isSearchEmpty && !hasError && (
-            <div className="hidden md:flex">
-              <ChangePaginationItems
-                meta={meta}
-                itemsPerPage={limit}
-                onItemsPerPageChange={setLimitPage}
-                isMobile={isMobile}
-                disabled={GetUsers.loading || hasError}
-
-              />
-            </div>
-          )}
+          <div className="hidden md:flex">
+            <ChangePaginationItems
+              meta={meta}
+              itemsPerPage={limit}
+              onItemsPerPageChange={setLimitPage}
+              isMobile={isMobile}
+              disabled={GetUsers.loading || isSearchEmpty || hasError || isEmpty}
+            />
+          </div>
           <div className="flex-1 md:max-w-md flex gap-2">
             <Input
               type="search"
               placeholder="Buscar por nombre, apellido o email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              leftIcon={<Search className="h-4 w-4" />}
+              leftIcon={<SearchIcon className="h-4 w-4" />}
               disabled={GetUsers.loading || hasError}
               fullWidth={isMobile}
               className='flex-1'
@@ -205,7 +203,7 @@ export default function UsersView() {
                           className="hover:cursor-pointer hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
                           disabled={GetUsers.loading || hasError}
                         >
-                          <ChevronsUpDown className={`h-4 w-4 ${sortBy === column.sortKey ? 'text-gray-800' : 'text-gray-400'}`} />
+                          <ChevronsUpDownIcon className={`h-4 w-4 ${sortBy === column.sortKey ? 'text-gray-800' : 'text-gray-400'}`} />
                         </button>
                       </div>
                     ) : (
@@ -243,7 +241,8 @@ export default function UsersView() {
                   </TableCell>
                   <TableCell>{user.email || '-'}</TableCell>
                   <TableCell>
-                    {user.isActive ? (
+                    {/* TODO: incluir status desde el valor principal de usuario */}
+                    {user.profile?.status === 'A' ? (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         Activo
                       </span>
@@ -253,28 +252,27 @@ export default function UsersView() {
                       </span>
                     )}
                   </TableCell>
-                  <TableCell>{getUserSeniority(user.profile?.enrollmentDate)}</TableCell>
+                  <TableCell>{user?.dni || '-'}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
+                    <div className="border-l pl-3 border-gray-200 h-10 flex items-center justify-end gap-1">
+                      <IconButton
+                        variant='outlined'
                         onClick={(e) => {
                           e.stopPropagation()
                           handleEditUser(user)
                         }}
-                        className="text-indigo-600 hover:text-indigo-800 font-medium text-sm"
                       >
-                        Editar
-                      </button>
-                      <span className="text-gray-300">|</span>
-                      <button
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        variant='outlined'
                         onClick={(e) => {
                           e.stopPropagation()
                           handleViewDashboard(user)
                         }}
-                        className="text-indigo-600 hover:text-indigo-800 font-medium text-sm"
                       >
-                        Ver Dashboard
-                      </button>
+                        <LayoutDashboardIcon />
+                      </IconButton>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -318,18 +316,19 @@ export default function UsersView() {
             className={isMobile ? 'bg-white mt-4 border-0 rounded-2xl' : ''}
           />
         )}
-      </div>
+      </div >
 
 
       {/* User Details Modal */}
-      <UserDetailsModal isOpen={isModalOpen.active} onClose={handleCloseModal}>
+      <UserDetailsModal isOpen={isModalOpen.active} onClose={handleCloseModal} >
         {selectedUser && (
           <UserDetailsContent
             user={selectedUser}
             onEdit={handleEditUser}
             onViewDashboard={handleViewDashboard}
           />
-        )}
+        )
+        }
       </UserDetailsModal>
 
       {/* Sort Modal (Mobile) */}
@@ -337,11 +336,13 @@ export default function UsersView() {
         isOpen={isSortModalOpen.active}
         onClose={isSortModalOpen.close}
         title="Ordenar por"
-        options={[
-          { key: 'lastName', label: 'Nombre' },
-          { key: 'email', label: 'Email' },
-          { key: 'isActive', label: 'Estado' }
-        ]}
+        options={
+          [
+            { key: 'lastName', label: 'Nombre' },
+            { key: 'email', label: 'Email' },
+            { key: 'isActive', label: 'Estado' },
+            { key: 'dni', label: 'DNI' }
+          ]}
         currentSort={sortBy || 'lastName'}
         currentOrder={sortOrder}
         onSortChange={(key, order) => {

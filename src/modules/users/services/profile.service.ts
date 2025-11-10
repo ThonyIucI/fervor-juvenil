@@ -9,7 +9,7 @@ import type { IUpdateProfilePayload, IUserWithProfile } from '../types/Profile'
 export interface GetUsersQueryParams {
   page?: number
   limit?: number
-  sortBy?: 'firstName' | 'lastName' | 'email' | 'createdAt' | 'isActive'
+  sortBy?: 'firstName' | 'lastName' | 'email' | 'createdAt' | 'isActive' | 'dni'
   sortOrder?: 'ASC' | 'DESC'
   isActive?: boolean
   search?: string
