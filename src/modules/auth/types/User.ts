@@ -12,6 +12,10 @@ export interface IUser {
   firstName: string
   lastName: string
   slug: string
+  isActive?: boolean
+  isGoogleAccount?: boolean
+  createdAt?: string
+  updatedAt?: string
   roles?: UserRole[]
   // Optional fields from old structure (kept for backward compatibility)
   name?: string

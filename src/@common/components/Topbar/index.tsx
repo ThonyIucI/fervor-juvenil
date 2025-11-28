@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bell, Menu, Moon, Search, Sun, X } from 'lucide-react'
+import { Bell, Menu, Moon, Sun, X } from 'lucide-react'
 
 import { useSidebarState } from '@/state/useSidebarState'
 import { useUserState } from '@/state/useUserState'
@@ -11,7 +11,7 @@ export function Topbar() {
   const { user } = useUserState()
   const [isDarkMode, setIsDarkMode] = useState(false)
   const { isOpen, toggle } = useSidebarState()
-  const { status: isDesktop } = useMediaQueryScreen('(min-width: 1280px)')
+  const isDesktop = useMediaQueryScreen('(min-width: 1280px)')
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode)
@@ -26,7 +26,9 @@ export function Topbar() {
   }
 
   return (
-    <header className="sticky top-0 flex w-full bg-white border-gray-200 z-40 xl:border-b" style={{ height: '64px' }}>
+    <header
+      className="sticky top-0 flex w-full bg-white border-gray-200 z-40 xl:border-b"
+    >
       <div className="flex flex-col items-center justify-between grow xl:flex-row xl:px-6">
         <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 sm:gap-4 xl:justify-normal xl:border-b-0 xl:px-0 lg:py-4">
           <Button
@@ -40,7 +42,8 @@ export function Topbar() {
           >
             {!isDesktop && isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
-          <div className="relative">
+          {/* TODO: Include general search to find modules  */}
+          {/*   <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
@@ -51,8 +54,8 @@ export function Topbar() {
                 'focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500',
                 'transition-colors'
               )}
-            />
-          </div>
+            /> 
+          </div>*/}
         </div>
 
         {/* Right Section - Actions */}

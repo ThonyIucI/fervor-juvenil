@@ -11,15 +11,23 @@ export interface ApiResponse<T = unknown> {
 
 /**
  * Paginated API Response
+ * Backend returns: { data: T[], meta: PaginationMeta }
  */
 export interface PaginatedResponse<T = unknown> {
   data: T[]
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-  }
+  meta: PaginationMeta
+}
+
+/**
+ * Pagination metadata (matches backend contract)
+ */
+export interface PaginationMeta {
+  currentPage: number
+  itemsPerPage: number
+  totalItems: number
+  totalPages: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
 }
 
 /**

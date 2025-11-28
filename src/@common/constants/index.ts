@@ -32,6 +32,7 @@ export const PAGINATION = {
   MAX_LIMIT: 100
 } as const
 
+export const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50, 100] as const
 // Debounce Times (in milliseconds)
 export const DEBOUNCE_TIME = {
   SEARCH: 500,

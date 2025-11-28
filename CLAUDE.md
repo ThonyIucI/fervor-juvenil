@@ -9,6 +9,7 @@ Fervor Juvenil is a React + TypeScript + Vite application using TailwindCSS for 
 ## Essential Commands
 
 ### Development
+
 ```bash
 npm run dev          # Start dev server (default port 3000)
 npm run start        # Alternative: dev server on port 3000
@@ -17,6 +18,7 @@ npm run preview      # Preview production build
 ```
 
 ### Code Quality
+
 ```bash
 npm run format:all   # Format with Prettier + ESLint fix (RECOMMENDED)
 npm run format       # Format with Prettier only
@@ -27,6 +29,7 @@ npm run lint:fix     # Auto-fix linting errors
 **IMPORTANT**: Always run `npm run format:all` (not just `format` or `lint:fix` individually). This ensures correct order: Prettier first, then ESLint. See `.claude/FORMATTING_GUIDE.md` for details.
 
 ### Testing
+
 ```bash
 npm test             # Run tests in watch mode
 npm run test:run     # Run tests once
@@ -74,6 +77,7 @@ Always use path aliases for cleaner imports.
 ### Import Order (Auto-enforced)
 
 ESLint automatically sorts imports in this order:
+
 1. React and React DOM
 2. External libraries (node_modules)
 3. Internal imports with `@` aliases
@@ -81,6 +85,7 @@ ESLint automatically sorts imports in this order:
 5. CSS imports
 
 Example:
+
 ```typescript
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -109,7 +114,7 @@ import { BaseService } from '@common/services/base.service'
 
 class UserService extends BaseService<User> {
   constructor() {
-    super('/users')  // Base endpoint
+    super('/users') // Base endpoint
   }
 
   // Inherits: getAll, getById, create, update, patch, delete
@@ -122,6 +127,7 @@ class UserService extends BaseService<User> {
 ```
 
 The `HttpService` includes:
+
 - Automatic Bearer token injection from localStorage
 - Global error handling (401 → logout, 403/500 → logging)
 - Type-safe responses with `ApiResponse<T>` wrapper
@@ -140,7 +146,7 @@ export const useUserState = create<IUserState>()(
       user: null,
       setUser: (user) => set({ user })
     }),
-    { name: 'user' }  // localStorage key
+    { name: 'user' } // localStorage key
   )
 )
 ```
@@ -167,7 +173,11 @@ const loginSchema = z.object({
 type LoginInputs = z.infer<typeof loginSchema>
 
 // In component
-const { register, handleSubmit, formState: { errors } } = useForm<LoginInputs>({
+const {
+  register,
+  handleSubmit,
+  formState: { errors }
+} = useForm<LoginInputs>({
   resolver: zodResolver(loginSchema)
 })
 ```
@@ -175,6 +185,7 @@ const { register, handleSubmit, formState: { errors } } = useForm<LoginInputs>({
 ### Routing Pattern
 
 Routes are protected via `PrivateRoute` wrapper that:
+
 1. Checks if user exists in `useUserState`
 2. Redirects to login if not authenticated
 3. Wraps authenticated pages in `MainLayout`
@@ -195,14 +206,79 @@ export const AUTH_ROUTES = {
 
 The project has a consistent design system with pre-built components in `@common/components/`:
 
-**Button**: 5 variants (primary, secondary, outline, ghost, danger) × 3 sizes (sm, md, lg)
+**Button Components**: All button-related components (Button, ButtonGroup, SortButton) share the same variants and sizes for consistency:
+
+- **Variants**: `primary`, `secondary`, `outline`, `ghost`, `danger`
+- **Sizes**: `sm`, `md`, `lg`
+- **Shared styles**: All button components import from `@common/components/Button/button.styles.ts` to avoid duplication
+
 ```typescript
+// Button component
 <Button variant="primary" size="md" isLoading={loading} leftIcon={<Icon />}>
   Submit
 </Button>
+
+// ButtonGroup for grouped actions
+<ButtonGroup
+  items={[
+    { label: <Icon />, onClick: handleClick, ariaLabel: 'Action' },
+    { label: <Icon />, onClick: handleClick2, ariaLabel: 'Action 2' }
+  ]}
+  variant="outline"
+  size="sm"
+/>
+
+// SortButton for mobile sorting
+<SortButton
+  onClick={openSortModal}
+  active={sortBy !== 'default'}
+  variant="outline"
+  size="md"
+/>
 ```
 
+**IconButton**: Icon-only button with Material UI design patterns
+
+Optimized for displaying icons with support for multiple sizes, colors, and variants.
+
+```typescript
+import { IconButton } from '@common/components/IconButton'
+import { Edit, Trash, Download } from 'lucide-react'
+
+// Ghost variant (default) - subtle hover effect
+<IconButton size="md" color="default" variant="ghost">
+  <Edit />
+</IconButton>
+
+// Outlined variant - with border
+<IconButton size="md" color="primary" variant="outlined">
+  <Edit />
+</IconButton>
+
+// Filled variant - solid background
+<IconButton size="sm" color="danger" variant="filled">
+  <Trash />
+</IconButton>
+
+// Success action
+<IconButton size="lg" color="success" variant="outlined">
+  <Download />
+</IconButton>
+```
+
+**Props:**
+- `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
+- `color`: `'default'` | `'primary'` | `'secondary'` | `'danger'` | `'success'` | `'warning'` (default: `'default'`)
+- `variant`: `'filled'` | `'outlined'` | `'ghost'` (default: `'ghost'`)
+- All standard button HTML attributes (onClick, disabled, aria-label, etc.)
+
+**Sizes:**
+- `sm`: 32px × 32px (icon: 16px)
+- `md`: 36px × 36px (icon: 20px)
+- `lg`: 40px × 40px (icon: 24px)
+
 **Input**: Supports labels, errors, icons, and integrates with react-hook-form
+
 ```typescript
 <Input
   label="Email"
@@ -213,9 +289,255 @@ The project has a consistent design system with pre-built components in `@common
 ```
 
 **Card**: 3 variants (default, outlined, elevated)
+
 ```typescript
 <Card variant="elevated">Content</Card>
 ```
+
+**Table**: Modular table component with persistent headers and internal state management
+
+The Table component is designed to keep headers **always visible** while managing loading, error, and empty states internally within the `TableBody`. This prevents headers from disappearing and maintains a consistent UI.
+
+**Key Principles**:
+- Headers are **persistent** - they never disappear
+- All states (loading, error, empty) are managed within `TableBody`
+- Skeleton rows are **complete rows** (using colSpan), not per-cell
+- Header buttons can be disabled during loading/error states
+
+```typescript
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@common/components/Table/Table'
+import { EmptyState } from '@common/components/EmptyState'
+
+// Define columns for counting and configuration
+const tableColumns = [
+  { key: 'name', label: 'Nombre', sortKey: 'lastName' },
+  { key: 'email', label: 'Email', sortKey: 'email' },
+  { key: 'status', label: 'Estado', sortKey: 'isActive' },
+  { key: 'actions', label: 'Acciones', sortKey: null, align: 'right' }
+]
+
+<Table>
+  {/* Headers - Always visible and persistent */}
+  <TableHeader>
+    <TableRow>
+      {tableColumns.map((column) => (
+        <TableHead key={column.key} align={column.align}>
+          {column.sortKey ? (
+            <button
+              onClick={() => handleSort(column.sortKey)}
+              disabled={isLoading || hasError}
+              className="hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {column.label}
+            </button>
+          ) : (
+            column.label
+          )}
+        </TableHead>
+      ))}
+    </TableRow>
+  </TableHeader>
+
+  {/* Body - Manages internal states */}
+  <TableBody
+    isLoading={isLoading}
+    skeletonRows={10}
+    columnCount={tableColumns.length}
+    showErrorState={hasError}
+    errorState={
+      <EmptyState
+        icon={<AlertIcon />}
+        title="Error al cargar datos"
+        description="No se pudieron cargar los datos."
+        variant="error"
+        action={{
+          label: 'Reintentar',
+          onClick: retryHandler
+        }}
+      />
+    }
+    showEmptyState={isEmpty}
+    emptyState={
+      <EmptyState
+        icon={<UsersIcon />}
+        title="No hay datos"
+        description="No se encontraron registros."
+      />
+    }
+  >
+    {data.map((item) => (
+      <TableRow key={item.id}>
+        <TableCell>{item.name}</TableCell>
+        <TableCell>{item.email}</TableCell>
+        {/* ... more cells */}
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
+```
+
+**TableBody Props**:
+- `isLoading`: Shows skeleton rows (full-width using colSpan)
+- `skeletonRows`: Number of skeleton rows to display (default: 10)
+- `columnCount`: Total number of columns (required for colSpan)
+- `showErrorState`: Boolean to show error state
+- `errorState`: ReactNode to render in error state
+- `showEmptyState`: Boolean to show empty state
+- `emptyState`: ReactNode to render in empty state
+
+**EmptyState Component**: Supports optional `action` prop for retry buttons
+
+```typescript
+<EmptyState
+  icon={<Icon />}
+  title="Title"
+  description="Description"
+  variant="error" // 'default' | 'warning' | 'error' | 'neutral'
+  action={{
+    label: 'Reintentar',
+    onClick: () => refetch(),
+    isLoading: false
+  }}
+/>
+```
+
+**Pagination**: Unified pagination (SOLID-compliant)
+
+Handles ONLY page navigation. **Does NOT manage empty/error states** - those are the parent component's responsibility (Single Responsibility Principle).
+
+```typescript
+import { Pagination } from '@common/components/Pagination'
+
+// Parent manages states separately
+{hasUsers && (
+  <Pagination
+    meta={paginationMeta}
+    onPreviousPage={handlePrev}
+    onNextPage={handleNext}
+    itemsPerPage={limit}
+    onItemsPerPageChange={setLimit}
+    isMobile={isMobile}
+    isLoading={isLoading}
+    disabled={hasError}
+  />
+)}
+
+{hasError && (
+  <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
+    <EmptyState icon={<AlertIcon />} title="Error" variant="error" />
+  </div>
+)}
+```
+
+**Mobile**: Uses `ButtonGroup` with independent prev/next onClick. Shows `1/5` format.
+**Desktop**: Traditional buttons with full info.
+
+**ButtonGroup**: Generic grouped buttons
+
+```typescript
+import { ButtonGroup } from '@common/components/ButtonGroup'
+
+<ButtonGroup
+  items={[
+    { icon: <Left />, onClick: handleLeft, disabled: false, ariaLabel: 'Left' },
+    { icon: <Right />, onClick: handleRight, disabled: false, ariaLabel: 'Right' }
+  ]}
+  size="sm"
+  variant="outline"
+/>
+```
+
+**SortModal + SortButton**: Mobile sorting
+
+Touch-friendly sorting for mobile with chips for ASC/DESC selection.
+
+```typescript
+import { SortModal } from '@common/components/SortModal'
+import { SortButton } from '@common/components/SortButton'
+
+// Button (place next to search bar on mobile)
+<SortButton
+  onClick={() => setModalOpen(true)}
+  disabled={isLoading}
+  active={sortBy !== 'default'}
+/>
+
+// Modal
+<SortModal
+  isOpen={modalOpen}
+  onClose={() => setModalOpen(false)}
+  options={[
+    { key: 'lastName', label: 'Nombre' },
+    { key: 'email', label: 'Email' }
+  ]}
+  currentSort={sortBy}
+  currentOrder={sortOrder}
+  onSortChange={(key, order) => {
+    setSortBy(key)
+    setSortOrder(order)
+  }}
+/>
+```
+
+**Features**: Slides from bottom, max 90vh, smooth transitions, auto-closes on selection.
+
+**Modal**: Generic modal component with multiple positions and smooth transitions
+
+Highly customizable modal with support for different positions (center, right, left, bottom), sizes, and mobile-friendly behavior.
+
+```typescript
+import { Modal } from '@common/components/Modal'
+
+// Side modal (right or left)
+<Modal
+  isOpen={isOpen}
+  onClose={handleClose}
+  title="User Details"
+  position="right"
+  showCloseButton={true}
+  closeOnOverlayClick={true}
+  closeOnEscape={true}
+>
+  <YourContent />
+</Modal>
+
+// Center modal with size
+<Modal
+  isOpen={isOpen}
+  onClose={handleClose}
+  title="Confirm Action"
+  position="center"
+  size="md"
+  showCloseButton={true}
+>
+  <YourContent />
+</Modal>
+
+// Bottom sheet (mobile-friendly)
+<Modal
+  isOpen={isOpen}
+  onClose={handleClose}
+  position="bottom"
+  showCloseButton={false}
+>
+  <YourContent />
+</Modal>
+```
+
+**Props:**
+- `position`: `'center'` | `'right'` | `'left'` | `'bottom'` (default: `'center'`)
+- `size`: `'sm'` | `'md'` | `'lg'` | `'xl'` | `'full'` (only for center position, default: `'md'`)
+- `showCloseButton`: Boolean (default: `true`)
+- `closeOnOverlayClick`: Boolean (default: `true`)
+- `closeOnEscape`: Boolean (default: `true`)
+
+**Behavior:**
+- **Right/Left modals**: Full height, 100% width on mobile, 500px-600px on desktop
+- **Center modals**: Responsive sizing with scale animation
+- **Bottom modals**: Max 90vh height, slides from bottom (mobile-friendly)
+- **Smooth transitions**: 300ms duration with ease-out timing and delayed mounting/unmounting for smooth entry/exit animations
+- **Body scroll prevention**: Automatically manages body overflow
+- **Keyboard support**: ESC key closes modal (can be disabled)
 
 ### Styling with Tailwind
 
@@ -226,18 +548,63 @@ import { cn } from '@common/utils/cn'
 
 <div className={cn(
   'base-classes',
-  condition && 'conditional-classes',
+  condition ? 'conditional-classes' : '',
   className  // Allow external overrides
 )} />
 ```
 
+**IMPORTANT**: When using `cn()`, **NEVER** use falsy values with `&&` operator. Always use ternary operators that return strings (empty string for false case):
+
+```typescript
+// ❌ Bad: Using && with falsy values
+className={cn(
+  'base',
+  isActive && 'active-classes'
+)}
+
+// ✅ Good: Always use ternary with strings
+className={cn(
+  'base',
+  isActive ? 'active-classes' : ''
+)}
+
+// ✅ Good: Multiple conditions
+className={cn(
+  'base',
+  isActive ? 'bg-indigo-50 border-indigo-300' : '',
+  isDisabled ? 'opacity-50 cursor-not-allowed' : '',
+  className
+)}
+```
+
+**Why?**: This ensures `cn()` only receives strings, preventing unexpected behavior from falsy values like `false`, `null`, or `undefined`.
+
+### Global Scrollbar Styles
+
+The project includes custom scrollbar styles that provide a more user-friendly experience:
+
+**Features**:
+- **Thin scrollbar**: 8px width (down from default ~15px)
+- **Appears on hover**: Scrollbar is transparent by default, only visible when hovering over scrollable content
+- **Smooth transitions**: Color changes animate smoothly
+- **Cross-browser support**: Works in both Webkit (Chrome, Safari, Edge) and Firefox
+
+**Colors**:
+- Default (on hover): `rgba(156, 163, 175, 0.5)` - gray-400 at 50% opacity
+- Hover state: `rgba(107, 114, 128, 0.7)` - gray-500 at 70% opacity
+- Active state: `rgba(75, 85, 99, 0.9)` - gray-600 at 90% opacity
+
+These styles are defined globally in `src/index.css` and apply to all scrollable elements automatically.
+
 ## Testing Patterns
 
 ### Test File Location
+
 - Unit tests: `src/tests/unit/[category]/[name].test.tsx`
 - Use `@tests/utils/test-utils` for rendering (includes providers like BrowserRouter)
 
 ### Example Test
+
 ```typescript
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@tests/utils/test-utils'
@@ -256,49 +623,74 @@ describe('Button Component', () => {
 ## TypeScript Conventions
 
 ### Type Imports
+
 Use `import type` for type-only imports (required by `verbatimModuleSyntax`):
 
 ```typescript
 import type { ReactNode, ButtonHTMLAttributes } from 'react'
 import type { AxiosResponse } from 'axios'
-import { useState } from 'react'  // Value import
+import { useState } from 'react' // Value import
 ```
 
 ### Avoid `any`
+
 Never use `any`. Use `unknown` for truly unknown types, then narrow with type guards.
 
 ### Interface Naming
+
 Interfaces can optionally use `I` prefix (e.g., `IUser`, `IUserState`) but it's not enforced. Be consistent within a module.
 
-### NO Barrel Exports
-**IMPORTANT**: Do NOT create barrel export files (index.ts/index.tsx that re-export from other files). This is considered a bad practice.
+### Component File Structure
 
-Instead of:
+**IMPORTANT**: All components must follow this structure:
+
+```
+src/@common/components/
+└── ComponentName/
+    └── index.tsx       # Contains the component
+```
+
+Import pattern:
+
 ```typescript
-// ❌ Bad: src/@common/components/Toast/index.ts
+// ✅ Correct
+import { Button } from '@common/components/Button'
+import { Table } from '@common/components/Table'
+
+// ❌ Wrong - don't reference index.tsx or duplicate the name
+import { Button } from '@common/components/Button/Button'
+import { Button } from '@common/components/Button/index'
+```
+
+**Why?**: Clean imports, consistent structure, easier refactoring.
+
+### NO Barrel Exports for Re-exporting
+
+**IMPORTANT**: Do NOT create barrel export files (index.ts/index.tsx) that re-export from multiple other files.
+
+```typescript
+// ❌ Bad: src/@common/components/Toast/index.ts re-exporting from other files
 export { Toast } from './Toast'
 export { ToastContainer } from './ToastContainer'
 ```
 
-Use direct imports:
-```typescript
-// ✅ Good: Import directly from source files
-import { Toast } from '@common/components/Toast/Toast'
-import { ToastContainer } from '@common/components/Toast/ToastContainer'
-```
+**Why?**: Barrel exports hurt tree-shaking, create circular dependency risks, and increase bundle size.
 
-**Why?**: Barrel exports hurt tree-shaking, create circular dependency risks, make debugging harder, and increase bundle size.
+**Note**: Using `index.tsx` as the main component file (as shown above) is correct and different from barrel exports.
 
 ### Always Use Route Constants
+
 **IMPORTANT**: Never hardcode route strings in components or hooks. Always define them as constants.
 
 Instead of:
+
 ```typescript
 // ❌ Bad: Hardcoded route string
 navigate('/profile')
 ```
 
 Use route constants:
+
 ```typescript
 // ✅ Good: Use constants defined in routes/index.ts
 import { USERS_ROUTES } from '@modules/users/routes'
@@ -306,6 +698,7 @@ navigate(USERS_ROUTES.PROFILE)
 ```
 
 **Why?**:
+
 - Single source of truth for all routes
 - Easy refactoring (change in one place)
 - Autocomplete and type safety
@@ -322,6 +715,7 @@ navigate(USERS_ROUTES.PROFILE)
 - **useMediaQueryScreen**: Responsive breakpoint detection
 
 Example:
+
 ```typescript
 import { useDebounce } from '@common/hooks'
 
@@ -350,14 +744,17 @@ useEffect(() => {
 ## Known Issues & Gotchas
 
 ### Formatting Conflicts
+
 **Problem**: Prettier and ESLint used to conflict on import ordering, causing infinite error loops.
 
 **Solution**: Prettier now handles only formatting (spaces, quotes), ESLint handles import ordering. Always run `npm run format:all` which does both in the correct order. See `.claude/FORMATTING_GUIDE.md`.
 
 ### TypeScript Strict Mode
+
 `verbatimModuleSyntax` is enabled, requiring `import type` for types. This prevents runtime imports of type-only dependencies.
 
 ### MainLayout Structure
+
 The `MainLayout` uses `flex h-screen overflow-hidden` with a fixed header. The main content area has `flex-1 overflow-auto` to enable scrolling while keeping the header fixed.
 
 ## Environment & Configuration
@@ -388,6 +785,7 @@ This project follows a **Test-Driven Development (TDD)** methodology with specia
 ### Quick Start for New Features
 
 To implement a user story:
+
 ```
 Implementa FJ-[número]: [nombre-breve]
 PR: feature/FJ-[número]-descripcion-breve
@@ -396,6 +794,7 @@ PR: feature/FJ-[número]-descripcion-breve
 ### TDD Cycle
 
 Every feature follows this cycle:
+
 1. **🔴 RED**: Write failing tests first
 2. **🟢 GREEN**: Implement code to pass tests
 3. **🔵 REFACTOR**: Improve code quality
@@ -405,6 +804,7 @@ See [WORKFLOW.md](./.claude/WORKFLOW.md) for complete development workflow.
 ### Specialized Agents
 
 The project uses specialized agents for different tasks:
+
 - **frontend-senior** (Sonnet): Complex architecture, performance, tech leadership
 - **frontend-mid** (Haiku): Standard features, CRUD, forms
 - **qa-tester** (Haiku): Test strategy, E2E tests, coverage analysis
@@ -418,6 +818,7 @@ All user stories are tracked in [requirements.md](./requirements.md) with detail
 ### Commit Conventions
 
 Follow Conventional Commits with TDD-specific types:
+
 ```bash
 test(feature): add failing tests for [feature]    # RED phase
 feat(feature): implement [feature] to pass tests  # GREEN phase

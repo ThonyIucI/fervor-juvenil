@@ -1,7 +1,7 @@
+import { Sidebar } from '@/@common/components/Sidebar'
+import { Topbar } from '@/@common/components/Topbar'
 import { useSidebarState } from '@/state/useSidebarState'
-import { Sidebar } from '@common/components/Sidebar/Sidebar'
 import { ToastContainer } from '@common/components/Toast/ToastContainer'
-import { Topbar } from '@common/components/Topbar/Topbar'
 import { cn } from '@common/utils/cn'
 
 interface ILayout {
@@ -36,7 +36,7 @@ export const MainLayout = ({ children }: ILayout) => {
         <Topbar />
 
         {/* Main Content Area */}
-        <main className="p-4 pb-20 mx-auto max-w-(--breakpoint-2xl) md:p-6 md:pb-24">
+        <main className="p-4 md:px-6 mx-auto max-w-(--breakpoint-2xl) ">
           {children}
         </main>
       </div>

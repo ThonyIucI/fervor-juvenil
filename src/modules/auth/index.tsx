@@ -34,13 +34,13 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="bg-gray-50 flex items-center justify-center p-4 animate-fadeIn">
+    <div className="md:h-screen bg-gray-50 flex items-center justify-center p-4 animate-fadeIn">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-        <div className="w-full flex justify-center mb-8">
+        <div className="w-full flex justify-center mb-1">
           <img src={fervorLogo} alt="Logo Fervor Juvenil" className="w-32" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Bienvenido</h2>
-        <p className="text-sm text-gray-500 mb-8 text-center">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Bienvenido <i>Fervorino</i></h2>
+        <p className="text-sm text-gray-500 mb-2 text-center">
           Ingresa tus credenciales para continuar
         </p>
         <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>

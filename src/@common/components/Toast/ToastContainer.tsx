@@ -1,6 +1,6 @@
 import { useToastState } from '@/state/useToastState'
 
-import { Toast } from './Toast'
+import { Toast } from '.'
 
 export function ToastContainer() {
   const { toasts } = useToastState()

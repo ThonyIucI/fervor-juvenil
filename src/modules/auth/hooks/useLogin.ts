@@ -23,6 +23,7 @@ const useLogin = () => {
       setLoginErrors(null)
 
       try {
+        setLoading(true)
         const response = await loginUser(loginInputs)
         const loginData = response.data.data
 
@@ -33,8 +34,8 @@ const useLogin = () => {
 
         // Map roles array to user.roles
         const userWithRoles = {
-          ...loginData.user,
-          roles: loginData.roles?.map((role) => role.name) || []
+          ...loginData?.user,
+          roles: loginData?.roles?.map((role) => role.name) || []
         }
 
         setToken(loginData.accessToken)

@@ -8,6 +8,46 @@
   --color-fj-red: #f20001;
   --color-fj-orange: #f55301;
 }
+
+/* Custom Scrollbar Styles - Subtle and only visible on hover/scroll */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+*:hover {
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  transition: all 0.1s ease-in-out;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+  width: 0px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+  width: 1px;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 114, 128, 0.7);
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background-color: rgba(75, 85, 99, 0.9);
+}
 .bg-fj-gradient {
   background: linear-gradient(
     0deg,

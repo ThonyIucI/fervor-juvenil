@@ -7,6 +7,9 @@ import { httpService } from './http.service'
 /**
  * Base service class with common CRUD operations
  * Extend this class to create specific services
+ *
+ * Note: All methods return unwrapped data (response.data.data)
+ * The backend returns data in format: { data: T }
  */
 export abstract class BaseService<T = unknown> {
   protected endpoint: string
@@ -26,18 +29,22 @@ export abstract class BaseService<T = unknown> {
 
   /**
    * Get paginated items
+   * Backend returns: { data: T[], meta: PaginationMeta }
+   * This method returns the full response (data + meta)
    */
   async getPaginated(params?: Record<string, unknown>): Promise<PaginatedResponse<T>> {
-    const response = await httpService.get<PaginatedResponse<T>>(this.endpoint, { params })
+    const response = await httpService.get(this.endpoint, { params })
 
-    return response.data.data as PaginatedResponse<T>
+    // Para paginado, el backend NO envuelve en ApiResponse
+    // Devuelve directamente: { data: T[], meta: PaginationMeta }
+    return response.data as unknown as PaginatedResponse<T>
   }
 
   /**
-   * Get single item by ID
+   * Get single item by UUID
    */
-  async getById(id: string | number): Promise<T> {
-    const response = await httpService.get<T>(`${this.endpoint}/${id}`)
+  async getByUuid(uuid: string): Promise<T> {
+    const response = await httpService.get<T>(`${this.endpoint}/${uuid}`)
 
     return response.data.data
   }
@@ -52,28 +59,28 @@ export abstract class BaseService<T = unknown> {
   }
 
   /**
-   * Update existing item
+   * Update existing item by UUID
    */
-  async update(id: string | number, data: Partial<T>): Promise<T> {
-    const response = await httpService.put<T>(`${this.endpoint}/${id}`, data)
+  async updateByUuid(uuid: string, data: Partial<T>): Promise<T> {
+    const response = await httpService.put<T>(`${this.endpoint}/${uuid}`, data)
 
     return response.data.data
   }
 
   /**
-   * Partially update existing item
+   * Partially update existing item by UUID
    */
-  async patch(id: string | number, data: Partial<T>): Promise<T> {
-    const response = await httpService.patch<T>(`${this.endpoint}/${id}`, data)
+  async patchByUuid(uuid: string, data: Partial<T>): Promise<T> {
+    const response = await httpService.patch<T>(`${this.endpoint}/${uuid}`, data)
 
     return response.data.data
   }
 
   /**
-   * Delete item by ID
+   * Delete item by UUID
    */
-  async delete(id: string | number): Promise<void> {
-    await httpService.delete(`${this.endpoint}/${id}`)
+  async deleteByUuid(uuid: string): Promise<void> {
+    await httpService.delete(`${this.endpoint}/${uuid}`)
   }
 
   /**

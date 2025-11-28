@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
-import { RoleProtectedRoute } from '@common/components/RoleProtectedRoute/RoleProtectedRoute'
+import { RoleProtectedRoute } from '@/@common/components/RoleProtectedRoute'
 
 import NotFoundPage from './@common/views/NotFound'
 import LoginForm from './modules/auth'

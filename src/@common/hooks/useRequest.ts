@@ -31,8 +31,8 @@ const getMessageString = (error: {
   response: { data: { errors: Record<string, string[]> } }
 }): string => {
   let aux = ''
-  getKeysOfObject(error.response.data.errors).map((k) => {
-    return error.response.data.errors[k].map((i) => {
+  getKeysOfObject(error?.response?.data?.errors).map((k) => {
+    return error?.response?.data?.errors[k].map((i) => {
       aux += `${i} `
     })
   })
@@ -51,8 +51,8 @@ const getErrorFromError = (error: unknown): ErrorObject => {
               : 'Ocurrió un error'
             const message = axiosError.response.data.errors
               ? getMessageString(
-                  error as { response: { data: { errors: Record<string, string[]> } } }
-                )
+                error as { response: { data: { errors: Record<string, string[]> } } }
+              )
               : axiosError.response.data.message || ''
             const reason = axiosError.response.data.reason ? axiosError.response.data.reason : ''
             return { title, message, reason, active: true, status: axiosError.response.status }

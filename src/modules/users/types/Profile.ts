@@ -6,7 +6,13 @@
 /**
  * Gender types
  */
-export type Gender = 'M' | 'F'
+export const EGender = {
+  M: 'M',
+  F: 'F'
+} as const;
+
+export type TGender = typeof EGender[keyof typeof EGender];
+
 
 /**
  * User status types
@@ -23,7 +29,7 @@ export type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-'
  */
 export interface IUserProfile {
   uuid: string
-  gender: Gender | null
+  gender: TGender | null
   age: number | null
   birthDate: string | null // ISO 8601 format
   status: UserStatus | null
@@ -48,7 +54,7 @@ export interface IUserProfile {
 }
 
 /**
- * User with profile data (response from /users/me)
+ * User with profile data (response from /users/me and /users list)
  */
 export interface IUserWithProfile {
   uuid: string
@@ -56,6 +62,8 @@ export interface IUserWithProfile {
   lastName: string
   email: string
   slug: string
+  dni: string
+  isActive?: boolean
   isGoogleAccount: boolean
   createdAt: string
   updatedAt: string
@@ -72,7 +80,7 @@ export interface IUpdateProfilePayload {
   email?: string
 
   // Profile fields
-  gender?: Gender
+  gender?: TGender
   age?: number
   birthDate?: string // Format: YYYY-MM-DD
   status?: UserStatus
