@@ -15,6 +15,7 @@ const mockUser: IUserWithProfile = {
   isActive: true,
   createdAt: '2024-01-01',
   updatedAt: '2024-01-01',
+  dni: '12345678',
   profile: {
     uuid: '456',
     gender: 'M',

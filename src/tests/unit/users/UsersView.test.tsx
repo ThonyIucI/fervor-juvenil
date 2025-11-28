@@ -25,6 +25,7 @@ const mockUsers: IUserWithProfile[] = [
     isActive: true,
     createdAt: '2024-01-01',
     updatedAt: '2024-01-01',
+    dni: '12345678',
     profile: {
       uuid: '101',
       gender: 'M',
@@ -61,6 +62,7 @@ const mockUsers: IUserWithProfile[] = [
     isActive: false,
     createdAt: '2024-01-15',
     updatedAt: '2024-01-15',
+    dni: '87654321',
     profile: {
       uuid: '102',
       gender: 'F',
@@ -109,7 +111,7 @@ describe('UsersView Component', () => {
   describe('Loading State', () => {
     it('should show loader while fetching users', () => {
       vi.mocked(ProfileService.getAllUsersPaginated).mockImplementation(
-        () => new Promise(() => {}) // Never resolves
+        () => new Promise(() => { }) // Never resolves
       )
 
       render(<UsersView />)

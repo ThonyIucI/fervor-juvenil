@@ -1,7 +1,6 @@
 import { ArrowUpDown } from 'lucide-react'
 
 import { Button, type ButtonSize, type ButtonVariant } from '@common/components/Button'
-import { buttonBase, buttonSizes, buttonVariants } from '@common/components/Button/button.styles'
 import { cn } from '@common/utils/cn'
 
 interface SortButtonProps {

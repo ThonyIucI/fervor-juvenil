@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bell, Menu, Moon, Search, Sun, X } from 'lucide-react'
+import { Bell, Menu, Moon, Sun, X } from 'lucide-react'
 
 import { useSidebarState } from '@/state/useSidebarState'
 import { useUserState } from '@/state/useUserState'
